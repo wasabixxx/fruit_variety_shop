@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AdminProductController extends Controller
 {
@@ -29,16 +28,11 @@ class AdminProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|url',
             'stock' => 'required|integer|min:0',
         ]);
 
         $data = $request->all();
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image'] = $imagePath;
-        }
 
         Product::create($data);
 
@@ -64,21 +58,11 @@ class AdminProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|url',
             'stock' => 'required|integer|min:0',
         ]);
 
         $data = $request->all();
-
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image'] = $imagePath;
-        }
 
         $product->update($data);
 
@@ -88,11 +72,6 @@ class AdminProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Xóa ảnh nếu có
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
-        
         $product->delete();
 
         return redirect()->route('admin.products.index')

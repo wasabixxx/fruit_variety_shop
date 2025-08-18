@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Fruit Variety Shop</title>
+    <title>Đăng ký - Fruit Variety Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -12,7 +12,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header text-center">
-                        <h4>Đăng nhập</h4>
+                        <h4>Đăng ký</h4>
                     </div>
                     <div class="card-body">
                         @if($errors->any())
@@ -23,8 +23,13 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('login') }}">
+                        <form method="POST" action="{{ route('register') }}">
                             @csrf
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ old('name') }}" required>
+                            </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" 
@@ -34,20 +39,19 @@
                                 <label for="password" class="form-label">Mật khẩu</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="password_confirmation" class="form-label">Xác nhận mật khẩu</label>
+                                <input type="password" class="form-control" id="password_confirmation" 
+                                       name="password_confirmation" required>
+                            </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                                <button type="submit" class="btn btn-success">Đăng ký</button>
                             </div>
                         </form>
                         
                         <div class="text-center mt-3">
-                            <p>Chưa có tài khoản? <a href="{{ route('register') }}">Đăng ký ngay</a></p>
+                            <p>Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập ngay</a></p>
                             <p><a href="/">Quay về trang chủ</a></p>
-                        </div>
-
-                        <div class="alert alert-info mt-3">
-                            <strong>Tài khoản Admin mặc định:</strong><br>
-                            Email: admin@admin.com<br>
-                            Mật khẩu: admin
                         </div>
                     </div>
                 </div>

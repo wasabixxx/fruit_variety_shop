@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('category')->paginate(10); // Pagination cho danh sách
+        $products = Product::with('category')->paginate(12); // Hiển thị 12 sản phẩm/trang cho user
         return view('products.index', compact('products'));
     }
 
@@ -34,6 +34,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $product->load('category'); // Load relationship
         return view('products.show', compact('product'));
     }
 

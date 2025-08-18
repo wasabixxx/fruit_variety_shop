@@ -16,10 +16,41 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
             <a class="navbar-brand" href="/">Fruit Variety Shop <i class="bi bi-flower1"></i></a>
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('categories.index') }}">Danh mục</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}">Sản phẩm</a></li>
+                </ul>
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/categories">Danh mục</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+                    @auth
+                        @if(auth()->user()->isAdmin())
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                                    <i class="bi bi-gear"></i> Admin Panel
+                                </a>
+                            </li>
+                        @endif
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person"></i> {{ auth()->user()->name }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Đăng nhập</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Đăng ký</a></li>
+                    @endauth
                 </ul>
             </div>
         </div>

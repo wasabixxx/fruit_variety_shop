@@ -7,9 +7,9 @@
     <div class="col-md-4 mb-4">
         <div class="card h-100">
             @if($product->image)
-                <img src="{{ asset($product->image) }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ $product->image }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
             @else
-                <img src="https://placehold.co/300x200" class="card-img-top" alt="Placeholder">
+                <img src="https://placehold.co/300x200?text={{ urlencode($product->name) }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
             @endif
             <div class="card-body">
                 <h5 class="card-title">{{ $product->name }}</h5>

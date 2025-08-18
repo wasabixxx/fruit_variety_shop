@@ -10,7 +10,7 @@ class AdminCategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::paginate(10);
+        $categories = Category::withCount('products')->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -34,6 +34,7 @@ class AdminCategoryController extends Controller
 
     public function show(Category $category)
     {
+        $category->load('products');
         return view('admin.categories.show', compact('category'));
     }
 
