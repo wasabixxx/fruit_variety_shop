@@ -25,15 +25,15 @@ class AuthController extends Controller
             $request->session()->regenerate();
             
             if (Auth::user()->isAdmin()) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->with('success', 'Chào mừng Admin đã đăng nhập thành công!');
             }
             
-            return redirect()->intended('/');
+            return redirect()->intended('/')->with('success', 'Đăng nhập thành công! Chào mừng bạn đến với Fruit Variety Shop.');
         }
 
         return back()->withErrors([
-            'email' => 'Thông tin đăng nhập không chính xác.',
-        ]);
+            'email' => 'Thông tin đăng nhập không chính xác. Vui lòng kiểm tra lại email và mật khẩu.',
+        ])->withInput($request->only('email'));
     }
 
     public function showRegisterForm()
@@ -58,14 +58,17 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Đăng ký tài khoản thành công! Chào mừng bạn đến với Fruit Variety Shop.');
     }
 
     public function logout(Request $request)
     {
+        $userName = Auth::user()->name ?? 'Người dùng';
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        
+        return redirect('/')->with('success', "Tạm biệt {$userName}! Bạn đã đăng xuất thành công.");
     }
 }
