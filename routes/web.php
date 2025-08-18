@@ -7,12 +7,15 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', function () {
     $products = Product::with('category')->paginate(9);
-    return view('welcome', compact('products'));
+    $totalProducts = Product::count();
+    $totalCategories = Category::count();
+    return view('welcome', compact('products', 'totalProducts', 'totalCategories'));
 });
 
 // Public product routes (không cần đăng nhập)
