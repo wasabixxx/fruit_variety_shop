@@ -25,7 +25,18 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('categories.index') }}">Danh mục</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}">Sản phẩm</a></li>
                 </ul>
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="{{ route('cart.index') }}">
+                            <i class="bi bi-cart4" style="font-size: 1.4rem;"></i>
+                            @php $cartCount = is_array(session('cart')) ? collect(session('cart'))->sum('quantity') : 0; @endphp
+                            @if($cartCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.8rem;">
+                                    {{ $cartCount }}
+                                </span>
+                            @endif
+                        </a>
+                    </li>
                     @auth
                         @if(auth()->user()->isAdmin())
                             <li class="nav-item">
@@ -57,6 +68,19 @@
     </nav>
     
     <div class="container mt-4">
+        <!-- Email Verification Notice -->
+        @auth
+            @if(!auth()->user()->isAdmin() && !auth()->user()->hasVerifiedEmail())
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-envelope-exclamation"></i>
+                    <strong>Xác nhận email:</strong> 
+                    Vui lòng kiểm tra email để xác nhận tài khoản của bạn.
+                    <a href="{{ route('email.verification.notice') }}" class="alert-link">Xem chi tiết</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        @endauth
+        
         <!-- Session Messages -->
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">

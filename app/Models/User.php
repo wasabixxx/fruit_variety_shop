@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'email_verification_token',
+        'email_verified_at',
     ];
 
     /**
@@ -32,6 +34,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verification_token',
     ];
 
     /**
@@ -52,5 +55,34 @@ class User extends Authenticatable
     public function isUser()
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Check if user's email is verified
+     */
+    public function hasVerifiedEmail()
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Mark email as verified
+     */
+    public function markEmailAsVerified()
+    {
+        return $this->update([
+            'email_verified_at' => now(),
+            'email_verification_token' => null,
+        ]);
+    }
+
+    /**
+     * Generate email verification token
+     */
+    public function generateEmailVerificationToken()
+    {
+        $token = bin2hex(random_bytes(32));
+        $this->update(['email_verification_token' => $token]);
+        return $token;
     }
 }

@@ -76,9 +76,13 @@
                 
                 <div class="d-flex flex-wrap gap-3">
                     @if($product->stock > 0)
-                        <button class="btn btn-success btn-lg flex-grow-1" style="max-width: 250px;">
-                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
-                        </button>
+                        <form method="POST" action="{{ route('cart.add', $product) }}" class="d-flex flex-grow-1 gap-2" style="max-width: 350px;">
+                            @csrf
+                            <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="form-control form-control-lg" style="width: 90px;">
+                            <button type="submit" class="btn btn-success btn-lg flex-grow-1">
+                                <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                            </button>
+                        </form>
                         <button class="btn btn-outline-success btn-lg">
                             <i class="bi bi-heart"></i> Yêu thích
                         </button>

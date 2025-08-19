@@ -96,9 +96,16 @@
                             </p>
                         @endif
                         
-                        <div class="mt-auto">
-                            <a href="{{ route('products.show', $product) }}" class="btn btn-success w-100">
-                                <i class="bi bi-eye"></i> Xem chi tiết
+                        <div class="mt-auto d-flex gap-2">
+                            <form method="POST" action="{{ route('cart.add', $product) }}" class="flex-grow-1">
+                                @csrf
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-outline-success w-100" @if($product->stock < 1) disabled @endif>
+                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                </button>
+                            </form>
+                            <a href="{{ route('products.show', $product) }}" class="btn btn-success">
+                                <i class="bi bi-eye"></i>
                             </a>
                         </div>
                     </div>
