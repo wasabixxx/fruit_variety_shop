@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
@@ -44,9 +46,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // Cart routes
-use App\Http\Controllers\CartController;
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+// Order routes
+Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
+Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
+Route::get('/order/payment', [OrderController::class, 'payment'])->name('orders.payment');
+Route::post('/order/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment');
+Route::get('/order/success', [OrderController::class, 'success'])->name('orders.success');

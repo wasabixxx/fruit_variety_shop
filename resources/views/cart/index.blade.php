@@ -64,9 +64,9 @@
             <a href="{{ route('products.index') }}" class="btn btn-outline-success me-2">
                 <i class="bi bi-arrow-left"></i> Tiếp tục mua hàng
             </a>
-            <button class="btn btn-success" disabled>
-                <i class="bi bi-credit-card"></i> Thanh toán (demo)
-            </button>
+            <a href="{{ route('orders.create') }}" class="btn btn-success">
+                <i class="bi bi-credit-card"></i> Đặt hàng
+            </a>
         </div>
     @else
         <div class="text-center py-5">
