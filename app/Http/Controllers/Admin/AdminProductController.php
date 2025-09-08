@@ -9,10 +9,39 @@ use Illuminate\Http\Request;
 
 class AdminProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->paginate(10);
-        return view('admin.products.index', compact('products'));
+        $query = Product::with('category');
+
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Filter by category
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Filter by stock status
+        if ($request->filled('stock_status')) {
+            switch ($request->stock_status) {
+                case 'in_stock':
+                    $query->where('stock', '>', 10);
+                    break;
+                case 'low_stock':
+                    $query->whereBetween('stock', [1, 10]);
+                    break;
+                case 'out_of_stock':
+                    $query->where('stock', 0);
+                    break;
+            }
+        }
+
+        $products = $query->paginate(10);
+        $categories = Category::all();
+        
+        return view('admin.products.index', compact('products', 'categories'));
     }
 
     public function create()
@@ -42,6 +71,7 @@ class AdminProductController extends Controller
 
     public function show(Product $product)
     {
+        $product->load('category');
         return view('admin.products.show', compact('product'));
     }
 

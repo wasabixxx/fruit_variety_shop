@@ -1,169 +1,259 @@
-@extends('admin.layouts.app')
+@extends('admin.layout')
 
-@section('title', 'Chi tiết đơn hàng #' . $order->id)
+@section('title', 'Chi tiết đơn hàng #' . $order->id . ' - Admin Panel')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.orders.index') }}">Quản lý Đơn hàng</a></li>
+    <li class="breadcrumb-item active">Chi tiết #{{ $order->id }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="h3 mb-1">Chi tiết đơn hàng #{{ $order->id }}</h1>
-            <p class="text-muted mb-0">Đặt ngày {{ $order->created_at->format('d/m/Y lúc H:i') }}</p>
+            <h1>Chi tiết đơn hàng #{{ $order->id }}</h1>
+            <p class="page-subtitle">Thông tin chi tiết về đơn hàng</p>
         </div>
-        <a href="{{ route('admin.orders') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Quay lại
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách
         </a>
     </div>
+</div>
 
-    <div class="row">
-        <!-- Order Info -->
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Thông tin khách hàng</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Tên:</strong> {{ $order->customer_name }}</p>
-                            <p><strong>Điện thoại:</strong> {{ $order->customer_phone }}</p>
-                            <p><strong>Địa chỉ:</strong> {{ $order->customer_address }}</p>
+<div class="row g-4">
+    <!-- Order Information -->
+    <div class="col-lg-8">
+        <!-- Order Status Card -->
+        <div class="admin-card card mb-4">
+            <div class="admin-card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Thông tin đơn hàng
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Mã đơn hàng</label>
+                        <div class="fw-bold text-primary">#{{ $order->id }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Ngày đặt</label>
+                        <div class="fw-semibold">{{ $order->created_at->format('d/m/Y H:i') }}</div>
+                        <small class="text-muted">{{ $order->created_at->diffForHumans() }}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-muted">Trạng thái</label>
+                        <div>
+                            @php
+                                $statusConfig = [
+                                    'pending' => ['class' => 'warning', 'icon' => 'clock', 'text' => 'Chờ xử lý'],
+                                    'confirmed' => ['class' => 'info', 'icon' => 'check-circle', 'text' => 'Đã xác nhận'],
+                                    'processing' => ['class' => 'primary', 'icon' => 'gear', 'text' => 'Đang xử lý'],
+                                    'shipped' => ['class' => 'secondary', 'icon' => 'truck', 'text' => 'Đã giao'],
+                                    'delivered' => ['class' => 'success', 'icon' => 'check-circle-fill', 'text' => 'Hoàn thành'],
+                                    'cancelled' => ['class' => 'danger', 'icon' => 'x-circle', 'text' => 'Đã hủy']
+                                ];
+                                $config = $statusConfig[$order->order_status] ?? $statusConfig['pending'];
+                            @endphp
+                            <span class="badge badge-{{ $config['class'] }}">
+                                <i class="bi bi-{{ $config['icon'] }} me-1"></i>{{ $config['text'] }}
+                            </span>
                         </div>
-                        <div class="col-md-6">
-                            @if($order->user)
-                                <p><strong>Tài khoản:</strong> {{ $order->user->email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Phương thức thanh toán</label>
+                        <div class="fw-semibold">
+                            @if($order->payment_method == 'cod')
+                                <i class="bi bi-cash text-success me-1"></i>Thanh toán khi nhận hàng
+                            @elseif($order->payment_method == 'momo')
+                                <i class="bi bi-phone text-primary me-1"></i>Ví điện tử MoMo
                             @else
-                                <p><strong>Tài khoản:</strong> <em>Khách vãng lai</em></p>
-                            @endif
-                            @if($order->note)
-                                <p><strong>Ghi chú:</strong> {{ $order->note }}</p>
+                                {{ $order->payment_method }}
                             @endif
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Order Items -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Sản phẩm đã đặt</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Sản phẩm</th>
-                                    <th>Đơn giá</th>
-                                    <th>Số lượng</th>
-                                    <th>Thành tiền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order->orderItems as $item)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            @if($item->product && $item->product->image)
-                                                <img src="{{ asset('storage/' . $item->product->image) }}" 
-                                                     alt="{{ $item->product->name ?? 'Sản phẩm đã xóa' }}" 
-                                                     class="rounded me-3" width="50">
-                                            @else
-                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
-                                                     style="width: 50px; height: 50px;">
-                                                    <i class="bi bi-image text-muted"></i>
-                                                </div>
-                                            @endif
-                                            <div>
-                                                <div class="fw-medium">
-                                                    {{ $item->product->name ?? 'Sản phẩm đã bị xóa' }}
-                                                </div>
-                                                @if($item->product && $item->product->category)
-                                                    <small class="text-muted">{{ $item->product->category->name }}</small>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ number_format($item->price) }} VNĐ</td>
-                                    <td>{{ $item->quantity }}</td>
-                                    <td class="fw-bold">{{ number_format($item->total_price) }} VNĐ</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <th colspan="3" class="text-end">Tổng cộng:</th>
-                                    <th class="text-success">{{ number_format($order->total_amount) }} VNĐ</th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Tổng tiền</label>
+                        <div class="fw-bold text-success fs-5">{{ number_format($order->total_amount, 0, ',', '.') }}đ</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Order Status -->
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Trạng thái đơn hàng</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('admin.orders.update-status', $order) }}">
-                        @csrf
-                        @method('PATCH')
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Trạng thái đơn hàng</label>
-                            <select name="order_status" class="form-select">
-                                <option value="pending" {{ $order->order_status == 'pending' ? 'selected' : '' }}>Chờ xử lý</option>
-                                <option value="confirmed" {{ $order->order_status == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
-                                <option value="processing" {{ $order->order_status == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
-                                <option value="shipped" {{ $order->order_status == 'shipped' ? 'selected' : '' }}>Đang giao hàng</option>
-                                <option value="delivered" {{ $order->order_status == 'delivered' ? 'selected' : '' }}>Đã giao hàng</option>
-                                <option value="cancelled" {{ $order->order_status == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Trạng thái thanh toán</label>
-                            <select name="payment_status" class="form-select">
-                                <option value="pending" {{ $order->payment_status == 'pending' ? 'selected' : '' }}>Chờ thanh toán</option>
-                                <option value="paid" {{ $order->payment_status == 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
-                                <option value="failed" {{ $order->payment_status == 'failed' ? 'selected' : '' }}>Thanh toán thất bại</option>
-                                <option value="refunded" {{ $order->payment_status == 'refunded' ? 'selected' : '' }}>Đã hoàn tiền</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-check-circle"></i> Cập nhật trạng thái
-                        </button>
-                    </form>
+        <!-- Order Items -->
+        <div class="admin-card card mb-4">
+            <div class="admin-card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-basket me-2"></i>
+                    Sản phẩm ({{ $order->orderItems->count() }})
+                </h5>
+            </div>
+            <div class="admin-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Số lượng</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($order->orderItems as $item)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if($item->product->image)
+                                            <img src="{{ $item->product->image }}" alt="{{ $item->product->name }}" 
+                                                 class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div class="fw-semibold">{{ $item->product->name }}</div>
+                                            <small class="text-muted">{{ $item->product->category->name }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ number_format($item->price, 0, ',', '.') }}đ</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ $item->quantity }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="fw-bold text-success">{{ number_format($item->price * $item->quantity, 0, ',', '.') }}đ</span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
+                                <td class="text-end">
+                                    <span class="fw-bold text-success fs-5">{{ number_format($order->total_amount, 0, ',', '.') }}đ</span>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Thông tin thanh toán</h5>
+    <!-- Customer Information -->
+    <div class="col-lg-4">
+        <!-- Customer Details -->
+        <div class="admin-card card mb-4">
+            <div class="admin-card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-person me-2"></i>
+                    Thông tin khách hàng
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                @if($order->user)
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                             style="width: 50px; height: 50px;">
+                            <i class="bi bi-person text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ $order->user->name }}</div>
+                            <small class="text-muted">{{ $order->user->email }}</small>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">Họ và tên</label>
+                    <div class="fw-semibold">{{ $order->customer_name }}</div>
                 </div>
-                <div class="card-body">
-                    <p><strong>Phương thức:</strong> 
-                        @if($order->payment_method == 'cod')
-                            <span class="badge bg-warning">Thanh toán khi nhận hàng</span>
-                        @elseif($order->payment_method == 'momo_atm')
-                            <span class="badge bg-primary">MoMo ATM</span>
-                        @elseif($order->payment_method == 'momo_card')
-                            <span class="badge bg-info">MoMo Card</span>
-                        @elseif($order->payment_method == 'momo_wallet')
-                            <span class="badge bg-secondary">MoMo Wallet</span>
-                        @endif
-                    </p>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">Số điện thoại</label>
+                    <div class="fw-semibold">
+                        <i class="bi bi-telephone me-1"></i>{{ $order->customer_phone }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">Email</label>
+                    <div class="fw-semibold">
+                        <i class="bi bi-envelope me-1"></i>{{ $order->user->email ?? 'Chưa có thông tin' }}
+                    </div>
+                </div>
+                
+                <div class="mb-0">
+                    <label class="form-label text-muted">Địa chỉ giao hàng</label>
+                    <div class="fw-semibold">
+                        <i class="bi bi-geo-alt me-1"></i>{{ $order->customer_address }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="admin-card card">
+            <div class="admin-card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    Thao tác
+                </h5>
+            </div>
+            <div class="admin-card-body">
+                <!-- Status Update Form -->
+                <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="mb-3">
+                    @csrf
+                    @method('PATCH')
                     
-                    @if($order->momo_transaction_id)
-                        <p><strong>Mã giao dịch MoMo:</strong> {{ $order->momo_transaction_id }}</p>
-                    @endif
+                    <!-- Order Status -->
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái đơn hàng</label>
+                        <select name="order_status" class="form-select">
+                            <option value="pending" {{ $order->order_status == 'pending' ? 'selected' : '' }}>Chờ xử lý</option>
+                            <option value="confirmed" {{ $order->order_status == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
+                            <option value="processing" {{ $order->order_status == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
+                            <option value="shipped" {{ $order->order_status == 'shipped' ? 'selected' : '' }}>Đã giao</option>
+                            <option value="delivered" {{ $order->order_status == 'delivered' ? 'selected' : '' }}>Hoàn thành</option>
+                            <option value="cancelled" {{ $order->order_status == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Payment Status -->
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái thanh toán</label>
+                        <select name="payment_status" class="form-select">
+                            <option value="pending" {{ $order->payment_status == 'pending' ? 'selected' : '' }}>Chưa thanh toán</option>
+                            <option value="paid" {{ $order->payment_status == 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
+                            <option value="failed" {{ $order->payment_status == 'failed' ? 'selected' : '' }}>Thanh toán thất bại</option>
+                            <option value="refunded" {{ $order->payment_status == 'refunded' ? 'selected' : '' }}>Đã hoàn tiền</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg me-2"></i>Cập nhật trạng thái
+                    </button>
+                </form>
 
-                    <p><strong>Tổng tiền:</strong> <span class="text-success fw-bold">{{ number_format($order->total_amount) }} VNĐ</span></p>
-                </div>
+                <hr>
+
+                <!-- Delete Order -->
+                <form action="{{ route('admin.orders.delete', $order) }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger w-100"
+                            onclick="return confirmDelete('Bạn có chắc chắn muốn xóa đơn hàng này?')">
+                        <i class="bi bi-trash me-2"></i>Xóa đơn hàng
+                    </button>
+                </form>
             </div>
         </div>
     </div>

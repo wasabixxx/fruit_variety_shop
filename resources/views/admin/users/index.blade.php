@@ -1,39 +1,44 @@
-@extends('layouts.admin')
+@extends('admin.layout')
 
-@section('title', 'Quản lý người dùng - Admin Panel')
+@section('title', 'Quản lý User - Admin Panel')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-    <li class="breadcrumb-item active">Quản lý người dùng</li>
+    <li class="breadcrumb-item active">Quản lý User</li>
 @endsection
 
 @section('content')
-<!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 fw-bold text-dark mb-1">Quản lý người dùng</h1>
-        <p class="text-muted mb-0">Xem và quản lý tất cả người dùng hệ thống</p>
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Quản lý User</h1>
+            <p class="page-subtitle">Xem và quản lý tất cả người dùng hệ thống</p>
+        </div>
     </div>
 </div>
 
 <!-- Users Table -->
 <div class="admin-card card">
     <div class="admin-card-header">
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-people me-2"></i>
+                Danh sách User ({{ $users->total() }})
+            </h5>
             <div class="d-flex align-items-center">
-                <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
-                    <i class="bi bi-people text-primary"></i>
-                </div>
-                <h5 class="fw-bold mb-0">Danh sách người dùng ({{ $users->total() }})</h5>
+                <input type="text" class="form-control search-filter me-3" placeholder="Tìm kiếm..." style="width: 250px;">
+                <span class="badge badge-primary">{{ $users->total() }} user</span>
             </div>
         </div>
     </div>
     <div class="admin-card-body p-0">
         <div class="table-responsive">
-            <table class="admin-table table mb-0">
+            <table class="table admin-table mb-0">
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Avatar</th>
                         <th>Tên</th>
                         <th>Email</th>
                         <th>Vai trò</th>
@@ -45,39 +50,63 @@
                 <tbody>
                     @forelse($users as $user)
                     <tr>
-                        <td><strong>#{{ $user->id }}</strong></td>
-                        <td class="fw-semibold">{{ $user->name }}</td>
-                        <td class="text-muted">{{ $user->email }}</td>
+                        <td>
+                            <span class="fw-bold text-primary">#{{ $user->id }}</span>
+                        </td>
+                        <td>
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">
+                                <i class="bi bi-person text-primary"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ $user->name }}</div>
+                            <small class="text-muted">ID: #{{ $user->id }}</small>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ $user->email }}</span>
+                        </td>
                         <td>
                             @if($user->role === 'admin')
-                                <span class="badge badge-admin-danger rounded-pill">Admin</span>
+                                <span class="badge badge-danger">
+                                    <i class="bi bi-shield-check me-1"></i>Admin
+                                </span>
                             @else
-                                <span class="badge badge-admin-primary rounded-pill">User</span>
+                                <span class="badge badge-primary">
+                                    <i class="bi bi-person me-1"></i>User
+                                </span>
                             @endif
                         </td>
                         <td>
                             @if($user->orders_count > 0)
-                                <span class="badge badge-admin-success rounded-pill">{{ $user->orders_count }}</span>
+                                <span class="badge badge-success">{{ $user->orders_count }} đơn</span>
                             @else
-                                <span class="text-muted">0</span>
+                                <span class="text-muted">Chưa có đơn hàng</span>
                             @endif
                         </td>
-                        <td class="text-muted">{{ $user->created_at->format('d/m/Y') }}</td>
+                        <td>
+                            <span class="text-muted">{{ $user->created_at->format('d/m/Y') }}</span>
+                            <br>
+                            <small class="text-muted">{{ $user->created_at->diffForHumans() }}</small>
+                        </td>
                         <td>
                             @if($user->orders_count > 0)
-                                <a href="{{ route('admin.users.orders', $user) }}" class="btn btn-outline-primary btn-sm">
+                                <a href="{{ route('admin.users.orders', $user) }}" class="btn btn-outline-info btn-sm">
                                     <i class="bi bi-eye me-1"></i>Xem đơn hàng
                                 </a>
                             @else
-                                <span class="text-muted">Chưa có đơn hàng</span>
+                                <span class="text-muted">Chưa có hoạt động</span>
                             @endif
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <i class="bi bi-people fs-1 d-block mb-3 text-muted opacity-50"></i>
-                            <p class="text-muted mb-0">Không có người dùng nào</p>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <h5>Chưa có user nào</h5>
+                                <p>Hệ thống chưa có user đăng ký</p>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -85,25 +114,53 @@
             </table>
         </div>
     </div>
+    
     @if($users->hasPages())
-    <div class="admin-card-footer">
-        {{ $users->links() }}
+    <div class="admin-card-body border-top">
+        <div class="d-flex justify-content-center">
+            {{ $users->links() }}
+        </div>
     </div>
     @endif
 </div>
-@endsection
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+
+<!-- User Stats -->
+<div class="row g-4 mt-4">
+    <div class="col-md-3">
+        <div class="card stats-card primary">
+            <div class="card-body text-center">
+                <i class="bi bi-people fs-1 mb-2"></i>
+                <h4>{{ $users->total() }}</h4>
+                <p class="mb-0 opacity-75">Tổng user</p>
             </div>
         </div>
-        @if($users->hasPages())
-        <div class="card-footer">
-            {{ $users->links() }}
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card success">
+            <div class="card-body text-center">
+                <i class="bi bi-person-check fs-1 mb-2"></i>
+                <h4>{{ $users->where('role', 'user')->count() }}</h4>
+                <p class="mb-0 opacity-75">Khách hàng</p>
+            </div>
         </div>
-        @endif
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card warning">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check fs-1 mb-2"></i>
+                <h4>{{ $users->where('role', 'admin')->count() }}</h4>
+                <p class="mb-0 opacity-75">Quản trị viên</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card info">
+            <div class="card-body text-center">
+                <i class="bi bi-cart-check fs-1 mb-2"></i>
+                <h4>{{ $users->sum('orders_count') }}</h4>
+                <p class="mb-0 opacity-75">Tổng đơn hàng</p>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

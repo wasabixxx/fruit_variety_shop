@@ -13,64 +13,34 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $totalCategories = Category::count();
         $totalProducts = Product::count();
-        $totalUsers = User::where('role', 'user')->count();
+        $totalCategories = Category::count();
         $totalOrders = Order::count();
+        $totalUsers = User::count();
+        $recentOrders = Order::with(['user', 'orderItems.product'])
+                            ->orderBy('created_at', 'desc')
+                            ->limit(5)
+                            ->get();
         
-        $recentProducts = Product::with('category')->latest()->take(5)->get();
-        $recentOrders = Order::with(['orderItems.product', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        $ordersByStatus = Order::selectRaw('order_status, COUNT(*) as count')
-            ->groupBy('order_status')
-            ->pluck('count', 'order_status');
-
         return view('admin.dashboard', compact(
-            'totalCategories',
             'totalProducts', 
-            'totalUsers',
-            'totalOrders',
-            'recentProducts',
-            'recentOrders',
-            'ordersByStatus'
+            'totalCategories', 
+            'totalOrders', 
+            'totalUsers', 
+            'recentOrders'
         ));
     }
 
     // Quản lý đơn hàng
-    public function orders(Request $request)
+    public function orders()
     {
-        $query = Order::with(['orderItems.product', 'user']);
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('order_status', $request->status);
-        }
-
-        // Filter by payment method
-        if ($request->filled('payment_method')) {
-            $query->where('payment_method', $request->payment_method);
-        }
-
-        // Search by customer name or phone
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%");
-            });
-        }
-
-        $orders = $query->orderBy('created_at', 'desc')->paginate(15);
-
+        $orders = Order::with(['user', 'orderItems.product'])->orderBy('created_at', 'desc')->paginate(15);
         return view('admin.orders.index', compact('orders'));
     }
 
     public function orderDetail(Order $order)
     {
-        $order->load(['orderItems.product', 'user']);
+        $order->load(['orderItems.product.category', 'user']);
         return view('admin.orders.show', compact('order'));
     }
 
@@ -92,7 +62,7 @@ class AdminController extends Controller
     public function deleteOrder(Order $order)
     {
         $order->delete();
-        return redirect()->route('admin.orders')->with('success', 'Đã xóa đơn hàng!');
+        return redirect()->route('admin.orders.index')->with('success', 'Đã xóa đơn hàng!');
     }
 
     // Quản lý user
@@ -100,6 +70,14 @@ class AdminController extends Controller
     {
         $users = User::withCount('orders')->orderBy('created_at', 'desc')->paginate(20);
         return view('admin.users.index', compact('users'));
+    }
+
+    public function userDetail(User $user)
+    {
+        $user->load(['orders' => function($query) {
+            $query->orderBy('created_at', 'desc');
+        }]);
+        return view('admin.users.show', compact('user'));
     }
 
     public function userOrders(User $user)
