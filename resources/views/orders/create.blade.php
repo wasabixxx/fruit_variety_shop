@@ -52,13 +52,25 @@
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
                                 <label class="form-check-label" for="cod">
-                                    <i class="bi bi-cash"></i> Thanh toán khi nhận hàng (COD)
+                                    <i class="bi bi-cash text-success me-2"></i> Thanh toán khi nhận hàng (COD)
                                 </label>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="payment_method" id="qr" value="qr">
-                                <label class="form-check-label" for="qr">
-                                    <i class="bi bi-qr-code"></i> Thanh toán ngay bằng QR
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="momo_atm" value="momo_atm">
+                                <label class="form-check-label" for="momo_atm">
+                                    <i class="bi bi-credit-card text-primary me-2"></i> MoMo - Thẻ ATM/Internet Banking
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="momo_card" value="momo_card">
+                                <label class="form-check-label" for="momo_card">
+                                    <i class="bi bi-credit-card-2-front text-info me-2"></i> MoMo - Thẻ Visa/MasterCard
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="momo_wallet" value="momo_wallet">
+                                <label class="form-check-label" for="momo_wallet">
+                                    <img src="https://itviec.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsiZGF0YSI6MjA0NjgzMiwicHVyIjoiYmxvYl9pZCJ9fQ==--6d1081fa86f1300daa38e2cb2fd3ffc5a28b6592/eyJfcmFpbHMiOnsiZGF0YSI6eyJmb3JtYXQiOiJwbmciLCJyZXNpemVfdG9fbGltaXQiOlszMDAsMzAwXX0sInB1ciI6InZhcmlhdGlvbiJ9fQ==--e1d036817a0840c585f202e70291f5cdd058753d/MoMo%20Logo.png" width="20" class="me-2"> MoMo - Ví điện tử MoMo
                                 </label>
                             </div>
                         </div>

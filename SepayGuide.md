@@ -280,3 +280,6 @@ public function handle()
   3. **Số tiền + khoảng thời gian + STK nhận** (dự phòng thủ công)
 
 > Hết. File này đủ để AI/Dev khác thực thi mà không cần tham chiếu ngoài.
+\\
+
+https://developers.momo.vn/v3/vi/docs/payment/onboarding/test-instructions/#th%C3%B4ng-tin-test-th%E1%BA%BB-atm

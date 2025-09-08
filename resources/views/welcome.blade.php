@@ -1,199 +1,320 @@
 @extends('layouts.app')
 
+@section('title', 'Fruit Variety Shop - Trái cây tươi ngon, chất lượng cao')
+
 @section('content')
 <!-- Hero Section -->
-<div class="hero-section mb-5">
-    <div class="container">
-        <div class="row align-items-center py-5">
-            <div class="col-lg-6">
-                <h1 class="display-3 fw-bold text-success mb-4">
-                    <i class="bi bi-flower2"></i> Fruit Variety Shop
-                </h1>
-                <p class="lead text-muted mb-4">
-                    Chuyên cung cấp hạt giống cây ăn quả chất lượng cao, 
-                    giúp bạn tạo ra khu vườn xanh mát và thu hoạch những trái cây tươi ngon.
-                </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ route('products.index') }}" class="btn btn-success btn-lg">
-                        <i class="bi bi-bag"></i> Xem sản phẩm
-                    </a>
-                    <a href="{{ route('categories.index') }}" class="btn btn-outline-success btn-lg">
-                        <i class="bi bi-grid"></i> Danh mục
-                    </a>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center">
-                <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
-                     alt="Fresh Fruits" class="img-fluid rounded shadow-lg" style="max-height: 400px;">
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Stats Section -->
-<div class="container mb-5">
-    <div class="row text-center">
-        <div class="col-md-3 mb-4">
-            <div class="card border-0 shadow-sm h-100 stats-card">
-                <div class="card-body">
-                    <i class="bi bi-box text-success display-4 mb-3"></i>
-                    <h3 class="fw-bold">{{ $totalProducts }}+</h3>
-                    <p class="text-muted">Sản phẩm</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-0 shadow-sm h-100 stats-card">
-                <div class="card-body">
-                    <i class="bi bi-grid text-success display-4 mb-3"></i>
-                    <h3 class="fw-bold">{{ $totalCategories }}+</h3>
-                    <p class="text-muted">Danh mục</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-0 shadow-sm h-100 stats-card">
-                <div class="card-body">
-                    <i class="bi bi-star text-success display-4 mb-3"></i>
-                    <h3 class="fw-bold">100%</h3>
-                    <p class="text-muted">Chất lượng</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-0 shadow-sm h-100 stats-card">
-                <div class="card-body">
-                    <i class="bi bi-truck text-success display-4 mb-3"></i>
-                    <h3 class="fw-bold">24/7</h3>
-                    <p class="text-muted">Hỗ trợ</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Featured Products -->
-@if($products->count() > 0)
-<div class="container mb-5">
-    <div class="row mb-4">
-        <div class="col-12 text-center">
-            <h2 class="display-5 fw-bold text-success mb-3">
-                <i class="bi bi-star"></i> Sản phẩm nổi bật
-            </h2>
-            <p class="lead text-muted">Những hạt giống cây ăn quả được yêu thích nhất</p>
-        </div>
-    </div>
+<div class="position-relative overflow-hidden">
+    <div class="hero-bg position-absolute w-100 h-100" 
+         style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.9) 0%, rgba(229, 87, 34, 0.8) 100%), 
+                url('https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover;"></div>
     
-    <div class="row">
-        @foreach($products as $product)
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-sm product-card">
-                @if($product->image)
-                    <img src="{{ $product->image }}" class="card-img-top" alt="{{ $product->name }}" style="height: 250px; object-fit: cover;">
-                @else
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                    </div>
-                @endif
-                
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title fw-bold">{{ $product->name }}</h5>
-                    
-                    <div class="mb-2">
-                        <a href="{{ route('categories.show', $product->category) }}" class="text-decoration-none">
-                            <small class="text-muted">
-                                <i class="bi bi-tag"></i> {{ $product->category->name }}
-                            </small>
-                        </a>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <span class="text-success fw-bold fs-4">
-                            {{ number_format($product->price) }} VNĐ
-                        </span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        @if($product->stock > 10)
-                            <span class="badge bg-success">Còn hàng ({{ $product->stock }})</span>
-                        @elseif($product->stock > 0)
-                            <span class="badge bg-warning">Sắp hết ({{ $product->stock }})</span>
-                        @else
-                            <span class="badge bg-danger">Hết hàng</span>
-                        @endif
-                    </div>
-                    
-                    @if($product->description)
-                        <p class="card-text text-muted flex-grow-1">
-                            {{ Str::limit($product->description, 100) }}
+    <div class="position-relative py-5">
+        <div class="container py-5">
+            <div class="row align-items-center min-vh-75">
+                <div class="col-lg-6">
+                    <div class="hero-content text-white">
+                        <div class="badge bg-white text-primary px-3 py-2 rounded-pill mb-4 fw-semibold">
+                            <i class="bi bi-star-fill me-2"></i>Chất lượng #1 Việt Nam
+                        </div>
+                        
+                        <h1 class="display-4 fw-bold mb-4 lh-1">
+                            Trái cây tươi ngon <br>
+                            <span class="text-warning">giao tận nhà</span>
+                        </h1>
+                        
+                        <p class="fs-5 mb-5 opacity-90">
+                            Khám phá bộ sưu tập trái cây cao cấp từ những vùng trồng uy tín. 
+                            Tươi ngon, sạch sẽ, giao hàng nhanh chóng trong ngày.
                         </p>
+                        
+                        <div class="d-flex flex-column flex-sm-row gap-3">
+                            <a href="{{ route('products.index') }}" class="btn btn-warning btn-lg px-4 py-3">
+                                <i class="bi bi-bag-check me-2"></i>Mua ngay
+                            </a>
+                            <a href="{{ route('categories.index') }}" class="btn btn-outline-light btn-lg px-4 py-3">
+                                <i class="bi bi-grid-3x3-gap me-2"></i>Xem danh mục
+                            </a>
+                        </div>
+                        
+                        <div class="row mt-5">
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <div class="h3 fw-bold mb-1">{{ $totalProducts ?? 100 }}+</div>
+                                    <small class="opacity-75">Sản phẩm</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <div class="h3 fw-bold mb-1">24h</div>
+                                    <small class="opacity-75">Giao hàng</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-center">
+                                    <div class="h3 fw-bold mb-1">5⭐</div>
+                                    <small class="opacity-75">Đánh giá</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">
+                Tại sao chọn chúng tôi
+            </div>
+            <h2 class="display-6 fw-bold mb-3">Cam kết chất lượng hàng đầu</h2>
+            <p class="text-muted fs-5">Chúng tôi luôn đặt chất lượng và sự hài lòng của khách hàng lên hàng đầu</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-truck text-primary fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Giao hàng nhanh chóng</h5>
+                        <p class="text-muted mb-0">Giao hàng trong ngày tại TP.HCM, 2-3 ngày toàn quốc. Đảm bảo tươi ngon khi đến tay bạn.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-shield-check text-secondary fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Chất lượng đảm bảo</h5>
+                        <p class="text-muted mb-0">Tất cả sản phẩm đều được kiểm tra kỹ lưỡng, có nguồn gốc rõ ràng từ các vùng trồng uy tín.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-currency-exchange text-warning fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Giá cả hợp lý</h5>
+                        <p class="text-muted mb-0">Cam kết giá tốt nhất thị trường. Chương trình khuyến mãi hấp dẫn thường xuyên.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-headset text-info fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Hỗ trợ 24/7</h5>
+                        <p class="text-muted mb-0">Đội ngũ tư vấn chuyên nghiệp sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-arrow-repeat text-success fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Đổi trả dễ dàng</h5>
+                        <p class="text-muted mb-0">Chính sách đổi trả trong 24h nếu không hài lòng về chất lượng sản phẩm.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 text-center p-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                             style="width: 80px; height: 80px;">
+                            <i class="bi bi-award text-danger fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Chứng nhận chất lượng</h5>
+                        <p class="text-muted mb-0">Được chứng nhận VietGAP, GlobalGAP và các tiêu chuẩn chất lượng quốc tế.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+@if(isset($products) && $products->count() > 0)
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">
+                Sản phẩm nổi bật
+            </div>
+            <h2 class="display-6 fw-bold mb-3">Trái cây được yêu thích nhất</h2>
+            <p class="text-muted fs-5">Những sản phẩm được khách hàng lựa chọn nhiều nhất</p>
+        </div>
+        
+        <div class="row g-4">
+            @foreach($products->take(6) as $product)
+            <div class="col-lg-4 col-md-6">
+                <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
+                    @if($product->image)
+                        <div class="position-relative overflow-hidden">
+                            <img src="{{ $product->image ?? asset('storage/' . $product->image) }}" 
+                                 class="card-img-top object-fit-cover" 
+                                 alt="{{ $product->name }}"
+                                 style="height: 250px; transition: transform 0.3s ease;">
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i>Nổi bật
+                                </span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
+                             style="height: 250px;">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-primary px-3 py-2 rounded-pill">
+                                    <i class="bi bi-star-fill me-1"></i>Nổi bật
+                                </span>
+                            </div>
+                        </div>
                     @endif
                     
-                    <div class="mt-auto">
-                        <a href="{{ route('products.show', $product) }}" class="btn btn-success w-100">
-                            <i class="bi bi-eye"></i> Xem chi tiết
-                        </a>
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="mb-2">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-2 py-1 rounded-pill">
+                                {{ $product->category->name }}
+                            </span>
+                        </div>
+                        
+                        <h5 class="card-title fw-bold mb-2">{{ $product->name }}</h5>
+                        <p class="card-text text-muted mb-3 flex-grow-1">
+                            {{ Str::limit($product->description ?? 'Sản phẩm chất lượng cao, tươi ngon', 100) }}
+                        </p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="price-info">
+                                <span class="h5 fw-bold text-primary mb-0">
+                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                </span>
+                                <small class="text-muted d-block">/ kg</small>
+                            </div>
+                            <div class="text-muted">
+                                @if($product->stock > 10)
+                                    <span class="badge bg-success">Còn hàng</span>
+                                @elseif($product->stock > 0)
+                                    <span class="badge bg-warning">Sắp hết</span>
+                                @else
+                                    <span class="badge bg-danger">Hết hàng</span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{{ route('products.show', $product) }}" class="btn btn-primary w-100">
+                                <i class="bi bi-eye me-2"></i>Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ route('products.index') }}" class="btn btn-outline-primary btn-lg px-5">
+                <i class="bi bi-arrow-right me-2"></i>Xem tất cả sản phẩm
+            </a>
+        </div>
+    </div>
+</section>
+@else
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="container text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted mb-4"></i>
+        <h3 class="text-muted mb-3">Chưa có sản phẩm nào</h3>
+        <p class="text-muted mb-4">Hệ thống đang được cập nhật, vui lòng quay lại sau.</p>
+        <a href="{{ route('categories.index') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-2"></i>Làm mới
+        </a>
+    </div>
+</section>
+@endif
+
+<!-- CTA Section -->
+<section class="py-5 position-relative overflow-hidden">
+    <div class="position-absolute w-100 h-100" 
+         style="background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);"></div>
+    
+    <div class="position-relative py-5">
+        <div class="container text-center text-white">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h2 class="display-5 fw-bold mb-4">
+                        Sẵn sàng thưởng thức trái cây tươi ngon?
+                    </h2>
+                    <p class="fs-5 mb-5 opacity-90">
+                        Đăng ký ngay hôm nay để nhận ưu đãi đặc biệt và cập nhật sản phẩm mới nhất
+                    </p>
+                    
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                        @guest
+                            <a href="{{ route('register') }}" class="btn btn-warning btn-lg px-5">
+                                <i class="bi bi-person-plus me-2"></i>Đăng ký ngay
+                            </a>
+                            <a href="{{ route('login') }}" class="btn btn-outline-light btn-lg px-5">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                            </a>
+                        @else
+                            <a href="{{ route('products.index') }}" class="btn btn-warning btn-lg px-5">
+                                <i class="bi bi-bag-check me-2"></i>Mua sắm ngay
+                            </a>
+                        @endguest
                     </div>
                 </div>
             </div>
         </div>
-        @endforeach
     </div>
-    
-    <div class="text-center mt-4">
-        <a href="{{ route('products.index') }}" class="btn btn-outline-success btn-lg">
-            <i class="bi bi-grid"></i> Xem tất cả sản phẩm
-        </a>
-    </div>
-</div>
-@else
-<div class="container">
-    <div class="text-center py-5">
-        <i class="bi bi-inbox display-1 text-muted"></i>
-        <h3 class="text-muted mt-3">Chưa có sản phẩm nào</h3>
-        <p class="text-muted">Hệ thống đang được cập nhật, vui lòng quay lại sau.</p>
-    </div>
-</div>
-@endif
-
-<!-- Call to Action -->
-<div class="bg-light py-5">
-    <div class="container text-center">
-        <h3 class="fw-bold text-success mb-3">Bắt đầu hành trình trồng trọt của bạn ngay hôm nay!</h3>
-        <p class="lead text-muted mb-4">
-            Hãy để chúng tôi giúp bạn tạo ra khu vườn trong mơ với những hạt giống chất lượng cao.
-        </p>
-        <a href="{{ route('products.index') }}" class="btn btn-success btn-lg me-3">
-            <i class="bi bi-bag"></i> Mua ngay
-        </a>
-        <a href="#" class="btn btn-outline-success btn-lg">
-            <i class="bi bi-telephone"></i> Liên hệ tư vấn
-        </a>
-    </div>
-</div>
+</section>
 
 <style>
-.hero-section {
-    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
-    border-radius: 15px;
-}
-
-.stats-card {
-    transition: transform 0.3s ease;
-}
-
-.stats-card:hover {
-    transform: translateY(-5px);
-}
-
-.product-card {
-    transition: transform 0.3s ease;
-    border: none;
+.product-card:hover img {
+    transform: scale(1.05);
 }
 
 .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    .min-vh-75 {
+        min-height: 60vh;
+    }
 }
 </style>
 @endsection

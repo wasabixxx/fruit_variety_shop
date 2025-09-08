@@ -57,6 +57,18 @@
                                 <i class="fas fa-box"></i> Quản lý sản phẩm
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.orders*') ? 'active' : '' }}" 
+                               href="{{ route('admin.orders') }}">
+                                <i class="fas fa-shopping-cart"></i> Quản lý đơn hàng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" 
+                               href="{{ route('admin.users') }}">
+                                <i class="fas fa-users"></i> Quản lý người dùng
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

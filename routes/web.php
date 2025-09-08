@@ -38,11 +38,25 @@ Route::get('/email/verify/{token}', [AuthController::class, 'verifyEmail'])->nam
 Route::get('/email/verify', [AuthController::class, 'showVerificationNotice'])->name('email.verification.notice')->middleware('auth');
 Route::post('/email/resend', [AuthController::class, 'resendVerification'])->name('email.resend')->middleware('auth');
 
-// Admin routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+// Admin routes - requires admin role
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function() {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Category management
     Route::resource('categories', AdminCategoryController::class);
+    
+    // Product management  
     Route::resource('products', AdminProductController::class);
+    
+    // Order management
+    Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+    Route::get('/orders/{order}', [AdminController::class, 'orderDetail'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
+    Route::delete('/orders/{order}', [AdminController::class, 'deleteOrder'])->name('orders.delete');
+    
+    // User management
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/users/{user}/orders', [AdminController::class, 'userOrders'])->name('users.orders');
 });
 
 // Cart routes
@@ -52,9 +66,20 @@ Route::post('/cart/update/{product}', [CartController::class, 'update'])->name('
 Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+// User order history
+Route::middleware('auth')->group(function() {
+    Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my-orders');
+    Route::get('/my-orders/{order}', [OrderController::class, 'myOrderDetail'])->name('orders.my-order-detail');
+});
+
 // Order routes
 Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/order/payment', [OrderController::class, 'payment'])->name('orders.payment');
-Route::post('/order/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment');
+Route::get('/order/payment-fallback', function() {
+    $orderInfo = session('order_info');
+    return view('orders.payment-mock', compact('orderInfo'));
+})->name('orders.payment-fallback');
+Route::get('/order/momo-return', [OrderController::class, 'momoReturn'])->name('orders.momo-return');
+Route::post('/order/momo-notify', [OrderController::class, 'momoNotify'])->name('orders.momo-notify');
 Route::get('/order/success', [OrderController::class, 'success'])->name('orders.success');

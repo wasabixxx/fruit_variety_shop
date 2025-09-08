@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 
 class OrderController extends Controller
 {
@@ -31,7 +34,7 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'payment_method' => 'required|in:cod,qr',
+            'payment_method' => 'required|in:cod,momo_atm,momo_card,momo_wallet',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
             'customer_address' => 'required|string|max:500'
@@ -39,7 +42,6 @@ class OrderController extends Controller
 
         $paymentMethod = $request->input('payment_method');
         
-        // Ở đây có thể lưu đơn hàng vào DB nếu muốn
         // Lưu thông tin đơn hàng vào session để hiển thị
         session([
             'order_info' => [
@@ -53,42 +55,226 @@ class OrderController extends Controller
             ]
         ]);
 
-        if ($paymentMethod === 'qr') {
-            // Chuyển đến trang thanh toán QR
-            return redirect()->route('orders.payment');
-        } else {
-            // Thanh toán khi nhận hàng - hoàn tất đơn hàng
+        if ($paymentMethod === 'cod') {
+            // COD: Lưu đơn hàng ngay
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'customer_name' => $request->customer_name,
+                'customer_phone' => $request->customer_phone, 
+                'customer_address' => $request->customer_address,
+                'total_amount' => $total,
+                'payment_method' => 'cod',
+                'payment_status' => 'pending',
+                'order_status' => 'pending',
+                'note' => $request->note
+            ]);
+
+            // Lưu chi tiết đơn hàng
+            foreach ($cart as $productId => $item) {
+                $order->orderItems()->create([
+                    'product_id' => $productId,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
+            }
+
             session()->forget('cart');
             return redirect()->route('orders.success')->with('success', 'Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn để giao hàng.');
+        } elseif (in_array($paymentMethod, ['momo_atm', 'momo_card', 'momo_wallet'])) {
+            // MoMo: Chuyển đến trang thanh toán với method
+            $method = str_replace('momo_', '', $paymentMethod); // atm, card, wallet
+            return redirect()->route('orders.payment', ['method' => $method]);
         }
     }
 
-    // Hiển thị trang thanh toán QR
-    public function payment()
+    // Hiển thị trang thanh toán MoMo
+    public function payment(Request $request)
     {
         $orderInfo = session('order_info');
-        if (!$orderInfo) {
-            return redirect()->route('cart.index')->with('error', 'Không tìm thấy thông tin đơn hàng!');
-        }
-        return view('orders.payment', compact('orderInfo'));
-    }
-
-    // Xác nhận đã thanh toán QR
-    public function confirmPayment(Request $request)
-    {
-        $orderInfo = session('order_info');
-        if (!$orderInfo) {
-            return redirect()->route('cart.index')->with('error', 'Không tìm thấy thông tin đơn hàng!');
-        }
+        $paymentMethod = $request->get('method', 'atm'); // Mặc định ATM
         
-        // Xóa giỏ hàng và thông tin đơn hàng
-        session()->forget(['cart', 'order_info']);
-        return redirect()->route('orders.success')->with('success', 'Thanh toán thành công! Chúng tôi sẽ xử lý đơn hàng của bạn.');
+        if (!$orderInfo) {
+            return redirect()->route('cart.index')->with('error', 'Không tìm thấy thông tin đơn hàng!');
+        }
+
+        // Tạo request MoMo theo đúng format API
+        $partnerCode = env('MOMO_PARTNER_CODE');
+        $accessKey = env('MOMO_ACCESS_KEY');
+        $secretKey = env('MOMO_SECRET_KEY');
+        $orderId = 'ORDER_' . time() . rand(1000, 9999);
+        $requestId = 'REQUEST_' . time() . rand(1000, 9999);
+        $amount = $orderInfo['total'];
+        $orderInfo_momo = 'Thanh toan FRUIT VARIETY SHOP - ' . $orderInfo['customer_name'];
+        $redirectUrl = route('orders.momo-return');
+        $ipnUrl = route('orders.momo-notify');
+        $extraData = '';
+        
+        // Xác định requestType theo payment method
+        $requestTypes = [
+            'atm' => 'payWithATM',      // ATM Online Banking
+            'card' => 'payWithCC',      // International Credit/Debit Card  
+            'wallet' => 'captureWallet' // MoMo Wallet
+        ];
+        $requestType = $requestTypes[$paymentMethod] ?? 'payWithATM';
+
+        // Tạo signature theo chuẩn MoMo
+        $rawHash = "accessKey=" . $accessKey . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo_momo . "&partnerCode=" . $partnerCode . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
+        $signature = hash_hmac("sha256", $rawHash, $secretKey);
+
+        $data = [
+            'partnerCode' => $partnerCode,
+            'partnerName' => "Test",
+            'storeId' => "MomoTestStore",
+            'requestId' => $requestId,
+            'amount' => $amount,
+            'orderId' => $orderId,
+            'orderInfo' => $orderInfo_momo,
+            'redirectUrl' => $redirectUrl,
+            'ipnUrl' => $ipnUrl,
+            'lang' => 'vi',
+            'extraData' => $extraData,
+            'requestType' => $requestType,
+            'signature' => $signature
+        ];
+
+        try {
+            // Gửi request đến MoMo API
+            $endpoint = env('MOMO_ENDPOINT');
+            $result = $this->execPostRequest($endpoint, json_encode($data));
+            $jsonResult = json_decode($result, true);
+
+            // Lưu orderId vào session để xác thực sau
+            session(['momo_order_id' => $orderId]);
+
+            return view('orders.payment', compact('orderInfo', 'jsonResult', 'data', 'paymentMethod'));
+        } catch (\Exception $e) {
+            // Nếu gặp lỗi API, chuyển về mock payment
+            session(['momo_order_id' => $orderId]);
+            return view('orders.payment-mock', compact('orderInfo', 'paymentMethod'));
+        }
+    }
+
+    // Hàm gửi POST request JSON đến MoMo
+    private function execPostRequest($url, $data)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data))
+        );
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        //execute post
+        $result = curl_exec($ch);
+        //close connection
+        curl_close($ch);
+        return $result;
+    }
+
+    // Xử lý kết quả trả về từ MoMo
+    public function momoReturn(Request $request)
+    {
+        $orderInfo = session('order_info');
+        $momoOrderId = session('momo_order_id');
+        
+        if (!$orderInfo || !$momoOrderId) {
+            return redirect()->route('cart.index')->with('error', 'Phiên thanh toán không hợp lệ!');
+        }
+
+        // Kiểm tra kết quả thanh toán
+        $resultCode = $request->get('resultCode', '1');
+        
+        if ($resultCode == '0') {
+            // Thanh toán thành công - Lưu đơn hàng vào database
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'customer_name' => $orderInfo['customer_name'],
+                'customer_phone' => $orderInfo['customer_phone'],
+                'customer_address' => $orderInfo['customer_address'],
+                'total_amount' => $orderInfo['total'],
+                'payment_method' => $orderInfo['payment_method'],
+                'payment_status' => 'paid',
+                'order_status' => 'confirmed',
+                'momo_transaction_id' => $request->input('transId'),
+                'note' => null
+            ]);
+
+            // Lưu chi tiết đơn hàng
+            foreach ($orderInfo['items'] as $productId => $item) {
+                $order->orderItems()->create([
+                    'product_id' => $productId,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
+                ]);
+            }
+
+            session()->forget(['cart', 'order_info', 'momo_order_id']);
+            return redirect()->route('orders.success')->with('success', 'Thanh toán MoMo thành công! Đơn hàng của bạn đã được xác nhận.');
+        } else {
+            // Thanh toán thất bại
+            $message = $this->getMomoErrorMessage($resultCode);
+            return redirect()->route('orders.create')->with('error', 'Thanh toán thất bại: ' . $message);
+        }
+    }
+
+    // Xử lý IPN từ MoMo (webhook)
+    public function momoNotify(Request $request)
+    {
+        // Log thông tin IPN để debug nếu cần
+        \Log::info('MoMo IPN:', $request->all());
+        
+        return response()->json(['status' => 'success']);
+    }
+
+    // Lấy thông báo lỗi MoMo
+    private function getMomoErrorMessage($resultCode)
+    {
+        $messages = [
+            '1' => 'Giao dịch thất bại',
+            '2' => 'Giao dịch bị từ chối',
+            '9' => 'Giao dịch bị hủy bởi người dùng',
+            '10' => 'Thẻ/Tài khoản bị khóa',
+            '11' => 'Thẻ hết hạn',
+            '12' => 'Thẻ chưa đăng ký dịch vụ',
+            '13' => 'Thẻ không đủ tiền',
+            '21' => 'Số tiền không hợp lệ',
+            '99' => 'Lỗi không xác định'
+        ];
+
+        return $messages[$resultCode] ?? 'Lỗi không xác định';
     }
 
     // Trang thành công
     public function success()
     {
         return view('orders.success');
+    }
+
+    // Lịch sử đơn hàng của user
+    public function myOrders()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để xem lịch sử đơn hàng.');
+        }
+
+        $orders = auth()->user()->orders()
+            ->with('orderItems.product')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('orders.my-orders', compact('orders'));
+    }
+
+    public function myOrderDetail(Order $order)
+    {
+        if (!auth()->check() || $order->user_id !== auth()->id()) {
+            abort(404);
+        }
+
+        $order->load('orderItems.product');
+        return view('orders.my-order-detail', compact('order'));
     }
 }
