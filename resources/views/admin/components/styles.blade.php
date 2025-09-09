@@ -96,12 +96,19 @@
     align-items: center;
 }
 
+/* Admin Layout */
+body {
+    overflow-x: hidden;
+}
+
 .admin-content {
+    position: relative;
     margin-left: var(--admin-sidebar-width);
     margin-top: var(--admin-header-height);
     padding: 2rem;
     min-height: calc(100vh - var(--admin-header-height));
     background: #F8FAFC;
+    box-sizing: border-box;
 }
 
 /* Card Styles */
@@ -111,6 +118,21 @@
     box-shadow: var(--admin-shadow);
     overflow: hidden;
     transition: all 0.3s ease;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Container fix */
+.admin-content .container-fluid,
+.admin-content .row,
+.admin-content [class*="col-"] {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.admin-content .row {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .admin-card:hover {
@@ -162,6 +184,17 @@
 .stats-card.info {
     --bg-start: #0891B2;
     --bg-end: var(--admin-info);
+}
+
+/* Additional Revenue Card Styles */
+.stats-card.revenue {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.stats-card.monthly-revenue {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
 }
 
 .stats-card:hover {
@@ -267,6 +300,33 @@
     
     .admin-content {
         margin-left: 0;
+        padding: 1rem;
+    }
+    
+    .stats-card {
+        min-height: 100px;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .admin-content {
+        padding: 0.75rem;
+    }
+    
+    .page-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.5rem;
     }
 }
 
@@ -292,5 +352,61 @@
 .btn-outline-primary:hover {
     background: var(--admin-primary);
     border-color: var(--admin-primary);
+}
+
+/* Chart Styles */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.chart-container canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Stats Cards Responsive */
+.stats-card {
+    border: none;
+    border-radius: var(--admin-border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    color: white;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+}
+
+/* Form Styles */
+.form-label.required::after {
+    content: " *";
+    color: var(--admin-danger);
+}
+
+.form-control {
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Progress Bars */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    border-radius: 4px;
 }
 </style>

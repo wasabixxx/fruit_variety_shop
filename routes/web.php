@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\ChartController;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
@@ -105,6 +106,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard.index');
     
+    // Reports
+    Route::get('/reports', function() {
+        return view('admin.reports.index');
+    })->name('reports.index');
+    
     // ========================================================================
     // CATEGORY MANAGEMENT - Quản lý danh mục
     // ========================================================================
@@ -151,6 +157,27 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [AdminController::class, 'users'])->name('index');
         Route::get('/{user}', [AdminController::class, 'userDetail'])->name('show');
         Route::get('/{user}/orders', [AdminController::class, 'userOrders'])->name('orders');
+    });
+    
+    // ========================================================================
+    // CHART APIs - API biểu đồ
+    // ========================================================================
+    Route::prefix('api/charts')->name('charts.')->group(function() {
+        Route::get('/daily-revenue', [ChartController::class, 'dailyRevenue'])->name('daily-revenue');
+        Route::get('/monthly-revenue', [ChartController::class, 'monthlyRevenue'])->name('monthly-revenue');
+        Route::get('/orders-by-status', [ChartController::class, 'ordersByStatus'])->name('orders-by-status');
+        Route::get('/top-products', [ChartController::class, 'topProducts'])->name('top-products');
+        Route::get('/category-stats', [ChartController::class, 'categoryStats'])->name('category-stats');
+        Route::get('/statistics', [ChartController::class, 'statistics'])->name('statistics');
+    });
+    
+    // ========================================================================
+    // REPORTS - Báo cáo
+    // ========================================================================
+    Route::prefix('reports')->name('reports.')->group(function() {
+        Route::get('/', function() {
+            return view('admin.reports.index');
+        })->name('index');
     });
     
 });

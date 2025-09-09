@@ -17,6 +17,7 @@
     @include('admin.components.styles')
     
     @yield('extra-css')
+    @stack('styles')
 </head>
 <body style="font-family: 'Inter', sans-serif;">
     
@@ -68,5 +69,6 @@
     @include('admin.components.scripts')
     
     @yield('extra-js')
+    @stack('scripts')
 </body>
 </html>

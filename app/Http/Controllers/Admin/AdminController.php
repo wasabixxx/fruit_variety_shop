@@ -8,6 +8,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -22,12 +24,73 @@ class AdminController extends Controller
                             ->limit(5)
                             ->get();
         
+        // Doanh thu theo tháng (12 tháng gần nhất)
+        $monthlyRevenue = Order::select(
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('SUM(total_amount) as total')
+            )
+            ->where('payment_status', 'paid')
+            ->where('created_at', '>=', Carbon::now()->subMonths(12))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        // Đơn hàng theo trạng thái
+        $ordersByStatus = Order::select('order_status', DB::raw('count(*) as total'))
+            ->groupBy('order_status')
+            ->get();
+
+        // Top sản phẩm bán chạy
+        $topProducts = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.order_status', '!=', 'cancelled')
+            ->select('products.name', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->groupBy('products.id', 'products.name')
+            ->orderBy('total_sold', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Thống kê theo danh mục
+        $categoryStats = Category::withCount(['products' => function($query) {
+                $query->where('stock', '>', 0);
+            }])
+            ->get();
+
+        // Doanh thu 7 ngày gần nhất
+        $dailyRevenue = Order::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(total_amount) as total'),
+                DB::raw('COUNT(*) as orders_count')
+            )
+            ->where('payment_status', 'paid')
+            ->where('created_at', '>=', Carbon::now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Tổng doanh thu
+        $totalRevenue = Order::where('payment_status', 'paid')->sum('total_amount');
+        $monthlyTotal = Order::where('payment_status', 'paid')
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
+            ->sum('total_amount');
+
         return view('admin.dashboard', compact(
             'totalProducts', 
             'totalCategories', 
             'totalOrders', 
             'totalUsers', 
-            'recentOrders'
+            'recentOrders',
+            'monthlyRevenue',
+            'ordersByStatus',
+            'topProducts',
+            'categoryStats',
+            'dailyRevenue',
+            'totalRevenue',
+            'monthlyTotal'
         ));
     }
 

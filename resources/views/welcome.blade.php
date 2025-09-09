@@ -19,12 +19,12 @@
                         </div>
                         
                         <h1 class="display-4 fw-bold mb-4 lh-1">
-                            Trái cây tươi ngon <br>
+                            Hạt trái cây chất lượng <br>
                             <span class="text-warning">giao tận nhà</span>
                         </h1>
                         
                         <p class="fs-5 mb-5 opacity-90">
-                            Khám phá bộ sưu tập trái cây cao cấp từ những vùng trồng uy tín. 
+                            Khám phá bộ sưu tập hạt trái cây cao cấp từ những vùng trồng uy tín. 
                             Tươi ngon, sạch sẽ, giao hàng nhanh chóng trong ngày.
                         </p>
                         
@@ -84,7 +84,7 @@
                             <i class="bi bi-truck text-primary fs-2"></i>
                         </div>
                         <h5 class="fw-bold mb-3">Giao hàng nhanh chóng</h5>
-                        <p class="text-muted mb-0">Giao hàng trong ngày tại TP.HCM, 2-3 ngày toàn quốc. Đảm bảo tươi ngon khi đến tay bạn.</p>
+                        <p class="text-muted mb-0">Giao hàng trong ngày tại Hà Nội, 2-3 ngày toàn quốc. Đảm bảo tươi ngon khi đến tay bạn.</p>
                     </div>
                 </div>
             </div>
@@ -268,7 +268,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <h2 class="display-5 fw-bold mb-4">
-                        Sẵn sàng thưởng thức trái cây tươi ngon?
+                        Đặt hàng ngay hôm nay và tận hưởng cảm giác sắp có trái cây ngollll!!!
                     </h2>
                     <p class="fs-5 mb-5 opacity-90">
                         Đăng ký ngay hôm nay để nhận ưu đãi đặc biệt và cập nhật sản phẩm mới nhất
