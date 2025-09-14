@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Fruit Variety Shop - Trái cây tươi ngon')</title>
     
     <!-- CSS -->
@@ -103,8 +104,8 @@
             box-shadow: var(--shadow-md);
         }
         
-        /* Cart Badge */
-        .cart-badge {
+        /* Cart Badge & Wishlist Badge */
+        .cart-badge, .wishlist-badge {
             position: absolute;
             top: -8px;
             right: -8px;
@@ -120,6 +121,10 @@
             font-weight: 600;
             box-shadow: var(--shadow-md);
             animation: pulse 2s infinite;
+        }
+        
+        .wishlist-badge {
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
         }
         
         @keyframes pulse {
@@ -367,6 +372,16 @@
                 </ul>
                 
                 <ul class="navbar-nav ms-auto align-items-center">
+                    <!-- Wishlist -->
+                    @auth
+                        <li class="nav-item me-2">
+                            <a class="nav-link position-relative p-2" href="{{ route('wishlist.index') }}" title="Danh sách yêu thích">
+                                <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
+                                <span class="wishlist-badge d-none">0</span>
+                            </a>
+                        </li>
+                    @endauth
+                    
                     <!-- Cart -->
                     <li class="nav-item me-2">
                         <a class="nav-link position-relative p-2" href="{{ route('cart.index') }}">
@@ -566,5 +581,60 @@
     </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Recommendation System -->
+    <script>
+        // Global variables for recommendation system
+        window.isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+    </script>
+    <script src="{{ asset('js/recommendations.js') }}"></script>
+    
+    <!-- Wishlist count loader -->
+    @auth
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load wishlist count on page load
+            loadWishlistCount();
+            
+            function loadWishlistCount() {
+                fetch('/wishlist/count', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateWishlistBadge(data.count);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading wishlist count:', error);
+                });
+            }
+            
+            function updateWishlistBadge(count) {
+                const badge = document.querySelector('.wishlist-badge');
+                if (badge) {
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                }
+            }
+            
+            // Global function to update wishlist count from other scripts
+            window.updateWishlistCount = function(newCount) {
+                updateWishlistBadge(newCount);
+            };
+        });
+    </script>
+    @endauth
+    
+    @stack('scripts')
 </body>
 </html>

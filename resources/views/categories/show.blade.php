@@ -43,8 +43,8 @@
             @foreach($products as $product)
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm product-card">
-                    @if($product->image)
-                        <img src="{{ $product->image }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
+                    @if($product->hasImage())
+                        <img src="{{ $product->image_url }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
                     @else
                         <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                             <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>

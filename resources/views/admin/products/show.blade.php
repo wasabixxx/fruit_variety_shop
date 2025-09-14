@@ -108,8 +108,8 @@
                 </h5>
             </div>
             <div class="admin-card-body text-center">
-                @if($product->image)
-                    <img src="{{ $product->image }}" alt="{{ $product->name }}" 
+                @if($product->hasImage())
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" 
                          class="img-fluid rounded shadow" style="max-height: 400px;">
                 @else
                     <div class="bg-light rounded d-flex align-items-center justify-content-center" 

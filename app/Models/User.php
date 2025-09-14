@@ -47,10 +47,38 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Reviews relationship
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    // Wishlist relationship
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function wishlistProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists');
+    }
+
     // Relationship with orders
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    // Voucher relationships
+    public function createdVouchers()
+    {
+        return $this->hasMany(Voucher::class, 'created_by');
+    }
+
+    public function voucherUsages()
+    {
+        return $this->hasMany(VoucherUsage::class);
     }
 
     public function isAdmin()

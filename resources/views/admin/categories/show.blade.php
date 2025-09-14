@@ -167,8 +167,8 @@
                     <tr>
                         <td><span class="fw-bold text-primary">#{{ $product->id }}</span></td>
                         <td>
-                            @if($product->image)
-                                <img src="{{ $product->image }}" alt="{{ $product->name }}" 
+                            @if($product->hasImage())
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" 
                                      class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             @else
                                 <div class="bg-light rounded d-flex align-items-center justify-content-center" 

@@ -86,8 +86,8 @@
             <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
                 <!-- Product Image -->
                 <div class="position-relative overflow-hidden">
-                    @if($product->image)
-                        <img src="{{ $product->image }}" 
+                    @if($product->hasImage())
+                        <img src="{{ $product->image_url }}" 
                              class="card-img-top object-fit-cover" 
                              alt="{{ $product->name }}"
                              style="height: 220px; transition: transform 0.3s ease;">
@@ -115,10 +115,21 @@
                         @endif
                     </div>
                     
-                    <!-- Quick View Button -->
-                    <div class="position-absolute top-0 end-0 m-3">
+                    <!-- Action Buttons Top Right -->
+                    <div class="position-absolute top-0 end-0 m-3 d-flex flex-column gap-2">
+                        <!-- Wishlist Button -->
+                        @auth
+                            <button class="btn btn-white btn-sm rounded-circle shadow-sm opacity-75 hover-opacity-100 wishlist-btn"
+                                    data-product-id="{{ $product->id }}" 
+                                    title="Thêm vào yêu thích">
+                                <i class="bi bi-heart text-danger"></i>
+                            </button>
+                        @endauth
+                        
+                        <!-- Quick View Button -->
                         <a href="{{ route('products.show', $product) }}" 
-                           class="btn btn-white btn-sm rounded-circle shadow-sm opacity-75 hover-opacity-100">
+                           class="btn btn-white btn-sm rounded-circle shadow-sm opacity-75 hover-opacity-100"
+                           title="Xem chi tiết">
                             <i class="bi bi-eye"></i>
                         </a>
                     </div>
@@ -275,5 +286,149 @@
         margin-bottom: 1rem;
     }
 }
+
+/* Wishlist button styles */
+.wishlist-btn {
+    transition: all 0.2s ease;
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.1);
+}
+
+.wishlist-btn.active i {
+    color: #E74C3C !important;
+}
+
+.wishlist-btn.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize wishlist status for all products
+    initializeWishlistStatus();
+    
+    // Handle wishlist button clicks
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            toggleWishlist(this);
+        });
+    });
+    
+    function initializeWishlistStatus() {
+        const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+        
+        wishlistButtons.forEach(button => {
+            const productId = button.dataset.productId;
+            
+            // Check if product is in wishlist
+            fetch('/wishlist/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.in_wishlist) {
+                    button.classList.add('active');
+                    button.querySelector('i').classList.remove('bi-heart');
+                    button.querySelector('i').classList.add('bi-heart-fill');
+                    button.title = 'Xóa khỏi yêu thích';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking wishlist status:', error);
+            });
+        });
+    }
+    
+    function toggleWishlist(button) {
+        const productId = button.dataset.productId;
+        const icon = button.querySelector('i');
+        const isActive = button.classList.contains('active');
+        
+        // Show loading state
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        // Send toggle request
+        fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update button state
+                if (data.action === 'added') {
+                    button.classList.add('active');
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                    button.title = 'Xóa khỏi yêu thích';
+                } else {
+                    button.classList.remove('active');
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                    button.title = 'Thêm vào yêu thích';
+                }
+                
+                // Update wishlist count in navbar
+                if (window.updateWishlistCount) {
+                    window.updateWishlistCount(data.wishlist_count);
+                }
+                
+                // Show success message
+                showToast(data.message, 'success');
+            } else {
+                throw new Error(data.message || 'Có lỗi xảy ra');
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling wishlist:', error);
+            showToast('Có lỗi xảy ra: ' + error.message, 'error');
+        })
+        .finally(() => {
+            // Remove loading state
+            button.classList.remove('loading');
+            button.disabled = false;
+        });
+    }
+    
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+});
+</script>
 @endsection

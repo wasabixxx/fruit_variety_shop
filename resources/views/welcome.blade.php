@@ -157,6 +157,242 @@
     </div>
 </section>
 
+<!-- Recommended Products Section -->
+@if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <div class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill mb-3">
+                <i class="bi bi-lightbulb me-1"></i>Dành riêng cho bạn
+            </div>
+            <h2 class="display-6 fw-bold mb-3">Sản phẩm được gợi ý</h2>
+            <p class="text-muted fs-5">
+                @auth
+                    Dựa trên sở thích và lịch sử mua hàng của bạn
+                @else
+                    Những sản phẩm phổ biến và được yêu thích nhất
+                @endauth
+            </p>
+        </div>
+        
+        <div class="row g-4" id="recommendedProductsContainer">
+            @foreach($recommendedProducts as $product)
+            <div class="col-lg-3 col-md-6">
+                <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
+                    @if($product->hasImage())
+                        <div class="position-relative overflow-hidden">
+                            <img src="{{ $product->image_url }}" 
+                                 class="card-img-top object-fit-cover" 
+                                 alt="{{ $product->name }}"
+                                 style="height: 200px; transition: transform 0.3s ease;">
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span class="badge bg-success px-2 py-1 rounded-pill">
+                                    <i class="bi bi-lightbulb-fill me-1"></i>Gợi ý
+                                </span>
+                            </div>
+                            @auth
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <button class="btn btn-sm btn-outline-light rounded-circle wishlist-btn" 
+                                        data-product-id="{{ $product->id }}"
+                                        title="Thêm vào danh sách yêu thích">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </div>
+                            @endauth
+                        </div>
+                    @else
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
+                             style="height: 200px;">
+                            <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                            <div class="position-absolute top-0 start-0 m-3">
+                                <span class="badge bg-success px-2 py-1 rounded-pill">
+                                    <i class="bi bi-lightbulb-fill me-1"></i>Gợi ý
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    <div class="card-body d-flex flex-column p-3">
+                        <div class="mb-2">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-2 py-1 rounded-pill small">
+                                {{ $product->category->name }}
+                            </span>
+                        </div>
+                        
+                        <h6 class="card-title fw-bold mb-2">{{ Str::limit($product->name, 50) }}</h6>
+                        
+                        @if($product->average_rating > 0)
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="text-warning me-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= floor($product->average_rating))
+                                            <i class="bi bi-star-fill"></i>
+                                        @elseif($i <= ceil($product->average_rating))
+                                            <i class="bi bi-star-half"></i>
+                                        @else
+                                            <i class="bi bi-star"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <small class="text-muted">({{ $product->total_reviews ?? 0 }})</small>
+                            </div>
+                        </div>
+                        @endif
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="price-info">
+                                <span class="h6 fw-bold text-primary mb-0">
+                                    {{ number_format($product->price, 0, ',', '.') }}đ
+                                </span>
+                                <small class="text-muted d-block">/ kg</small>
+                            </div>
+                            <div class="text-muted">
+                                @if($product->stock > 10)
+                                    <span class="badge bg-success-subtle text-success">Còn hàng</span>
+                                @elseif($product->stock > 0)
+                                    <span class="badge bg-warning-subtle text-warning">Sắp hết</span>
+                                @else
+                                    <span class="badge bg-danger-subtle text-danger">Hết hàng</span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{{ route('products.show', $product) }}" class="btn btn-outline-primary w-100 btn-sm">
+                                <i class="bi bi-eye me-1"></i>Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn btn-outline-success" id="loadMoreRecommended" data-type="user" data-offset="8">
+                <i class="bi bi-arrow-clockwise me-2"></i>Xem thêm gợi ý
+            </button>
+        </div>
+    </div>
+</section>
+@endif
+
+<!-- Popular & Trending Products Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="container py-5">
+        <!-- Popular Products -->
+        @if(isset($popularProducts) && $popularProducts->count() > 0)
+        <div class="mb-5">
+            <div class="text-center mb-5">
+                <div class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill mb-3">
+                    <i class="bi bi-fire me-1"></i>Phổ biến nhất
+                </div>
+                <h2 class="display-6 fw-bold mb-3">Sản phẩm bán chạy</h2>
+                <p class="text-muted fs-5">Những sản phẩm được mua nhiều nhất trong thời gian gần đây</p>
+            </div>
+            
+            <div class="row g-4" id="popularProductsContainer">
+                @foreach($popularProducts as $product)
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
+                        @if($product->hasImage())
+                            <div class="position-relative overflow-hidden">
+                                <img src="{{ $product->image_url }}" 
+                                     class="card-img-top object-fit-cover" 
+                                     alt="{{ $product->name }}"
+                                     style="height: 150px; transition: transform 0.3s ease;">
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-warning px-2 py-1 rounded-pill">
+                                        <i class="bi bi-fire me-1"></i>Hot
+                                    </span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
+                                 style="height: 150px;">
+                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-warning px-2 py-1 rounded-pill">
+                                        <i class="bi bi-fire me-1"></i>Hot
+                                    </span>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <div class="card-body p-3">
+                            <h6 class="card-title fw-bold mb-2 small">{{ Str::limit($product->name, 40) }}</h6>
+                            <div class="text-primary fw-bold small">
+                                {{ number_format($product->price, 0, ',', '.') }}đ
+                            </div>
+                            <a href="{{ route('products.show', $product) }}" class="btn btn-outline-primary w-100 btn-sm mt-2">
+                                Xem
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+        
+        <!-- Trending Products -->
+        @if(isset($trendingProducts) && $trendingProducts->count() > 0)
+        <div>
+            <div class="text-center mb-5">
+                <div class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-pill mb-3">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Xu hướng
+                </div>
+                <h2 class="display-6 fw-bold mb-3">Sản phẩm đang thịnh hành</h2>
+                <p class="text-muted fs-5">Những sản phẩm đang được quan tâm và tìm kiếm nhiều nhất</p>
+            </div>
+            
+            <div class="row g-4" id="trendingProductsContainer">
+                @foreach($trendingProducts as $product)
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
+                        @if($product->hasImage())
+                            <div class="position-relative overflow-hidden">
+                                <img src="{{ $product->image_url }}" 
+                                     class="card-img-top object-fit-cover" 
+                                     alt="{{ $product->name }}"
+                                     style="height: 150px; transition: transform 0.3s ease;">
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-info px-2 py-1 rounded-pill">
+                                        <i class="bi bi-trending-up me-1"></i>Trending
+                                    </span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
+                                 style="height: 150px;">
+                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-info px-2 py-1 rounded-pill">
+                                        <i class="bi bi-trending-up me-1"></i>Trending
+                                    </span>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <div class="card-body p-3">
+                            <h6 class="card-title fw-bold mb-2 small">{{ Str::limit($product->name, 40) }}</h6>
+                            <div class="text-primary fw-bold small">
+                                {{ number_format($product->price, 0, ',', '.') }}đ
+                            </div>
+                            <a href="{{ route('products.show', $product) }}" class="btn btn-outline-primary w-100 btn-sm mt-2">
+                                Xem
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+</section>
+
 <!-- Featured Products Section -->
 @if(isset($products) && $products->count() > 0)
 <section class="py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
@@ -173,9 +409,9 @@
             @foreach($products->take(6) as $product)
             <div class="col-lg-4 col-md-6">
                 <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
-                    @if($product->image)
+                    @if($product->hasImage())
                         <div class="position-relative overflow-hidden">
-                            <img src="{{ $product->image ?? asset('storage/' . $product->image) }}" 
+                            <img src="{{ $product->image_url }}" 
                                  class="card-img-top object-fit-cover" 
                                  alt="{{ $product->name }}"
                                  style="height: 250px; transition: transform 0.3s ease;">

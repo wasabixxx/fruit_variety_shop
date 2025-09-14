@@ -143,8 +143,8 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($item->product && $item->product->image)
-                                                <img src="{{ asset('storage/' . $item->product->image) }}" 
+                                            @if($item->product && $item->product->hasImage())
+                                                <img src="{{ $item->product->image_url }}" 
                                                      alt="{{ $item->product->name }}" 
                                                      class="rounded me-3" width="60">
                                             @else

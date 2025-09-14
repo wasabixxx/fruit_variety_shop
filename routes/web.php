@@ -8,7 +8,12 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminVoucherController;
 use App\Http\Controllers\Admin\ChartController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\VoucherController;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
@@ -33,7 +38,21 @@ Route::get('/', function () {
     $products = Product::with('category')->paginate(9);
     $totalProducts = Product::count();
     $totalCategories = Category::count();
-    return view('welcome', compact('products', 'totalProducts', 'totalCategories'));
+    
+    // Get recommendation service
+    $recommendationService = app(\App\Services\RecommendationService::class);
+    
+    // Get recommendations based on user status
+    if (auth()->check()) {
+        $recommendedProducts = $recommendationService->getRecommendationsForUser(auth()->user(), 8);
+    } else {
+        $recommendedProducts = $recommendationService->getGuestRecommendations(8);
+    }
+    
+    $popularProducts = $recommendationService->getPopularProducts(6);
+    $trendingProducts = $recommendationService->getTrendingProducts(6);
+    
+    return view('welcome', compact('products', 'totalProducts', 'totalCategories', 'recommendedProducts', 'popularProducts', 'trendingProducts'));
 })->name('home');
 
 // Sản phẩm công khai
@@ -97,6 +116,77 @@ Route::middleware('auth')->group(function() {
 });
 
 // ============================================================================
+// REVIEW ROUTES - Hệ thống đánh giá (cần đăng nhập)
+// ============================================================================
+
+Route::middleware('auth')->group(function() {
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::get('/reviews/user', [ReviewController::class, 'getUserReviews'])->name('reviews.user');
+    Route::post('/reviews/can-review', [ReviewController::class, 'canReview'])->name('reviews.can-review');
+});
+
+// Public review endpoints
+Route::get('/products/{product}/reviews', [ReviewController::class, 'getProductReviews'])->name('products.reviews');
+
+// ============================================================================
+// WISHLIST ROUTES - Hệ thống danh sách yêu thích (cần đăng nhập)
+// ============================================================================
+
+Route::middleware('auth')->group(function() {
+    // Wishlist pages
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    
+    // Wishlist actions
+    Route::post('/wishlist', [WishlistController::class, 'store'])->name('wishlist.store');
+    Route::delete('/wishlist/{product}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    
+    // AJAX endpoints
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::get('/wishlist/count', [WishlistController::class, 'count'])->name('wishlist.count');
+    Route::post('/wishlist/check', [WishlistController::class, 'check'])->name('wishlist.check');
+});
+
+// ============================================================================
+// RECOMMENDATION ROUTES - Hệ thống gợi ý sản phẩm
+// ============================================================================
+
+// Public recommendation routes
+Route::prefix('recommendations')->name('recommendations.')->group(function() {
+    Route::get('/user', [RecommendationController::class, 'getUserRecommendations'])->name('user');
+    Route::get('/product/{product}/similar', [RecommendationController::class, 'getSimilarProducts'])->name('similar');
+    Route::get('/popular', [RecommendationController::class, 'getPopularProducts'])->name('popular');
+    Route::get('/trending', [RecommendationController::class, 'getTrendingProducts'])->name('trending');
+    Route::post('/load-more', [RecommendationController::class, 'loadMore'])->name('load_more');
+});
+
+// Authenticated recommendation routes  
+Route::middleware('auth')->prefix('recommendations')->name('recommendations.')->group(function() {
+    Route::delete('/cache/clear', [RecommendationController::class, 'clearCache'])->name('clear_cache');
+});
+
+// ============================================================================
+// VOUCHER ROUTES - Hệ thống voucher giảm giá
+// ============================================================================
+
+// Public voucher routes
+Route::prefix('vouchers')->name('vouchers.')->group(function() {
+    Route::get('/', [VoucherController::class, 'index'])->name('index');
+    Route::get('/{voucher}', [VoucherController::class, 'show'])->name('show');
+    Route::post('/validate', [VoucherController::class, 'validateCode'])->name('validate');
+    Route::get('/api/available', [VoucherController::class, 'getAvailableVouchers'])->name('available');
+    Route::post('/api/calculate-savings', [VoucherController::class, 'calculateSavings'])->name('calculate-savings');
+    Route::post('/cart/apply', [VoucherController::class, 'applyToCart'])->name('cart.apply');
+    Route::delete('/cart/remove', [VoucherController::class, 'removeFromCart'])->name('cart.remove');
+});
+
+// Authenticated voucher routes
+Route::middleware('auth')->prefix('vouchers')->name('vouchers.')->group(function() {
+    Route::get('/my/history', [VoucherController::class, 'myVouchers'])->name('my-vouchers');
+});
+
+// ============================================================================
 // ADMIN ROUTES - Quản trị viên
 // ============================================================================
 
@@ -121,7 +211,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{category}', [AdminCategoryController::class, 'show'])->name('show');
         Route::get('/{category}/edit', [AdminCategoryController::class, 'edit'])->name('edit');
         Route::put('/{category}', [AdminCategoryController::class, 'update'])->name('update');
-        Route::patch('/{category}', [AdminCategoryController::class, 'update'])->name('update');
         Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
     });
     
@@ -135,7 +224,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{product}', [AdminProductController::class, 'show'])->name('show');
         Route::get('/{product}/edit', [AdminProductController::class, 'edit'])->name('edit');
         Route::put('/{product}', [AdminProductController::class, 'update'])->name('update');
-        Route::patch('/{product}', [AdminProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [AdminProductController::class, 'destroy'])->name('destroy');
     });
     
@@ -157,6 +245,34 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [AdminController::class, 'users'])->name('index');
         Route::get('/{user}', [AdminController::class, 'userDetail'])->name('show');
         Route::get('/{user}/orders', [AdminController::class, 'userOrders'])->name('orders');
+    });
+    
+    // ========================================================================
+    // ADMIN REVIEW MANAGEMENT - Quản lý đánh giá (Admin)
+    // ========================================================================
+    Route::prefix('reviews')->name('reviews.')->group(function() {
+        Route::get('/', [AdminController::class, 'reviews'])->name('index');
+        Route::patch('/{review}/approve', [AdminController::class, 'approveReview'])->name('approve');
+        Route::patch('/{review}/reject', [AdminController::class, 'rejectReview'])->name('reject');
+    });
+    
+    // ========================================================================
+    // VOUCHER MANAGEMENT - Quản lý Voucher
+    // ========================================================================
+    Route::prefix('vouchers')->name('vouchers.')->group(function() {
+        Route::get('/', [AdminVoucherController::class, 'index'])->name('index');
+        Route::get('/create', [AdminVoucherController::class, 'create'])->name('create');
+        Route::post('/', [AdminVoucherController::class, 'store'])->name('store');
+        Route::get('/{voucher}', [AdminVoucherController::class, 'show'])->name('show');
+        Route::get('/{voucher}/edit', [AdminVoucherController::class, 'edit'])->name('edit');
+        Route::put('/{voucher}', [AdminVoucherController::class, 'update'])->name('update');
+        Route::delete('/{voucher}', [AdminVoucherController::class, 'destroy'])->name('destroy');
+        
+        // Additional voucher actions
+        Route::patch('/{voucher}/toggle-status', [AdminVoucherController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/bulk-action', [AdminVoucherController::class, 'bulkAction'])->name('bulk-action');
+        Route::get('/export/csv', [AdminVoucherController::class, 'export'])->name('export');
+        Route::get('/api/statistics', [AdminVoucherController::class, 'statistics'])->name('api.statistics');
     });
     
     // ========================================================================

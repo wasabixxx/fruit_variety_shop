@@ -15,6 +15,10 @@ class Order extends Model
         'customer_phone',
         'customer_address',
         'total_amount',
+        'voucher_id',
+        'voucher_code',
+        'discount_amount',
+        'subtotal',
         'payment_method',
         'payment_status',
         'order_status',
@@ -24,6 +28,8 @@ class Order extends Model
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
@@ -32,6 +38,22 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    // Voucher relationship
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
+    }
+
+    public function voucherUsage()
+    {
+        return $this->hasOne(VoucherUsage::class);
     }
 
     // Relationship with OrderItems
@@ -75,5 +97,35 @@ class Order extends Model
             self::PAYMENT_STATUS_REFUNDED => 'Đã hoàn tiền',
         ];
         return $statuses[$this->payment_status] ?? 'Không xác định';
+    }
+
+    // Voucher helper methods
+    public function hasVoucher(): bool
+    {
+        return $this->voucher_id !== null;
+    }
+
+    public function getDiscountPercentage(): float
+    {
+        if ($this->subtotal > 0 && $this->discount_amount > 0) {
+            return ($this->discount_amount / $this->subtotal) * 100;
+        }
+        
+        return 0;
+    }
+
+    public function getFormattedDiscount(): string
+    {
+        return number_format($this->discount_amount, 0, ',', '.') . 'đ';
+    }
+
+    public function getFormattedSubtotal(): string
+    {
+        return number_format($this->subtotal, 0, ',', '.') . 'đ';
+    }
+
+    public function getFormattedTotal(): string
+    {
+        return number_format($this->total_amount, 0, ',', '.') . 'đ';
     }
 }
