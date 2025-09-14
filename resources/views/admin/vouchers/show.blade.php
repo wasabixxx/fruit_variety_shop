@@ -1,19 +1,20 @@
-@extends('admin.layouts.app')
+@extends('admin.layout')
 
-@section('title', 'Chi tiết Voucher')
+@section('title', 'Chi tiết Voucher - Admin Panel')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
+    <li class="breadcrumb-item active">{{ $voucher->code }}</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="h3 mb-1">Chi tiết Voucher</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
-                    <li class="breadcrumb-item active">{{ $voucher->code }}</li>
-                </ol>
-            </nav>
+            <h1>Chi tiết Voucher</h1>
+            <p class="page-subtitle">Thông tin voucher: {{ $voucher->code }}</p>
         </div>
         <div class="d-flex gap-2">
             <form action="{{ route('admin.vouchers.toggle-status', $voucher) }}" method="POST" class="d-inline">

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -216,14 +217,13 @@ class VoucherService
     /**
      * Get public vouchers (for display in frontend)
      */
-    public function getPublicVouchers(int $limit = 10): Collection
+    public function getPublicVouchers(int $perPage = 10): LengthAwarePaginator
     {
         return Voucher::valid()
             ->public()
             ->whereNull('applicable_users') // Only truly public vouchers
             ->orderBy('amount', 'desc')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage);
     }
     
     /**

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Voucher;
+use App\Models\VoucherUsage;
 
 class OrderController extends Controller
 {
@@ -13,23 +15,35 @@ class OrderController extends Controller
     public function create(Request $request)
     {
         $cart = session('cart', []);
-        $total = collect($cart)->sum(function($item) {
+        $subtotal = collect($cart)->sum(function($item) {
             return $item['price'] * $item['quantity'];
         });
-        if ($total <= 0 || count($cart) === 0) {
+        
+        // Get voucher info
+        $appliedVoucher = session('applied_voucher');
+        $discountAmount = session('voucher_discount_amount', 0);
+        $total = $subtotal - $discountAmount;
+        
+        if ($subtotal <= 0 || count($cart) === 0) {
             return redirect()->route('cart.index')->with('warning', 'Giỏ hàng trống!');
         }
-        return view('orders.create', compact('cart', 'total'));
+        return view('orders.create', compact('cart', 'subtotal', 'total', 'appliedVoucher', 'discountAmount'));
     }
 
     // Xử lý đặt hàng với phương thức thanh toán được chọn
     public function store(Request $request)
     {
         $cart = session('cart', []);
-        $total = collect($cart)->sum(function($item) {
+        $subtotal = collect($cart)->sum(function($item) {
             return $item['price'] * $item['quantity'];
         });
-        if ($total <= 0 || count($cart) === 0) {
+        
+        // Get voucher info
+        $appliedVoucher = session('applied_voucher');
+        $discountAmount = session('voucher_discount_amount', 0);
+        $total = $subtotal - $discountAmount;
+        
+        if ($subtotal <= 0 || count($cart) === 0) {
             return redirect()->route('cart.index')->with('warning', 'Giỏ hàng trống!');
         }
 
@@ -46,12 +60,15 @@ class OrderController extends Controller
         session([
             'order_info' => [
                 'items' => $cart,
+                'subtotal' => $subtotal,
+                'discount_amount' => $discountAmount,
                 'total' => $total,
                 'payment_method' => $paymentMethod,
                 'customer_name' => $request->input('customer_name'),
                 'customer_phone' => $request->input('customer_phone'),
                 'customer_address' => $request->input('customer_address'),
-                'order_time' => now()->format('d/m/Y H:i:s')
+                'order_time' => now()->format('d/m/Y H:i:s'),
+                'voucher' => $appliedVoucher
             ]
         ]);
 
@@ -63,6 +80,9 @@ class OrderController extends Controller
                 'customer_phone' => $request->customer_phone, 
                 'customer_address' => $request->customer_address,
                 'total_amount' => $total,
+                'discount_amount' => $discountAmount,
+                'voucher_id' => $appliedVoucher ? $appliedVoucher['id'] : null,
+                'voucher_code' => $appliedVoucher ? $appliedVoucher['code'] : null,
                 'payment_method' => 'cod',
                 'payment_status' => 'pending',
                 'order_status' => 'pending',
@@ -78,7 +98,13 @@ class OrderController extends Controller
                 ]);
             }
 
-            session()->forget('cart');
+            // Record voucher usage if applied
+            if ($appliedVoucher && $discountAmount > 0) {
+                $this->recordVoucherUsage($appliedVoucher['id'], $order, $discountAmount);
+            }
+
+            // Clear session
+            session()->forget(['cart', 'applied_voucher', 'voucher_discount_amount']);
             return redirect()->route('orders.success')->with('success', 'Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn để giao hàng.');
         } elseif (in_array($paymentMethod, ['momo_atm', 'momo_card', 'momo_wallet'])) {
             // MoMo: Chuyển đến trang thanh toán với method
@@ -276,5 +302,32 @@ class OrderController extends Controller
 
         $order->load('orderItems.product');
         return view('orders.my-order-detail', compact('order'));
+    }
+
+    /**
+     * Record voucher usage after successful order
+     */
+    private function recordVoucherUsage($voucherId, $order, $discountAmount)
+    {
+        if (!auth()->check()) {
+            return;
+        }
+
+        $voucher = Voucher::find($voucherId);
+        if (!$voucher) {
+            return;
+        }
+
+        // Create voucher usage record
+        VoucherUsage::create([
+            'voucher_id' => $voucherId,
+            'user_id' => auth()->id(),
+            'order_id' => $order->id,
+            'discount_amount' => $discountAmount,
+            'used_at' => now()
+        ]);
+
+        // Increment voucher used count
+        $voucher->increment('used_count');
     }
 }

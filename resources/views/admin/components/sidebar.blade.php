@@ -56,6 +56,14 @@
             </li>
             
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}" 
+                   href="{{ route('admin.vouchers.index') }}">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Quản lý Voucher</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
                    href="{{ route('admin.reports.index') }}">
                     <i class="bi bi-graph-up"></i>

@@ -144,33 +144,86 @@ class VoucherController extends Controller
     }
 
     /**
-     * Apply voucher to session cart (for guest checkout preparation)
+     * Apply voucher to cart
      */
     public function applyToCart(Request $request)
     {
         $request->validate([
-            'code' => 'required|string'
+            'voucher_code' => 'required|string',
+            'cart_total' => 'required|numeric|min:0'
         ]);
 
-        // Store voucher code in session for checkout
-        session(['voucher_code' => strtoupper(trim($request->code))]);
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập để sử dụng voucher'
+            ], 401);
+        }
+
+        // Get cart items to extract category IDs
+        $cart = session('cart', []);
+        $categoryIds = [];
+        foreach ($cart as $item) {
+            if (isset($item['category_id'])) {
+                $categoryIds[] = $item['category_id'];
+            }
+        }
+
+        $validation = $this->voucherService->validateVoucher(
+            $request->voucher_code,
+            Auth::user(),
+            $request->cart_total,
+            $categoryIds
+        );
+
+        if (!$validation['valid']) {
+            return response()->json([
+                'success' => false,
+                'message' => $validation['message']
+            ]);
+        }
+
+        $voucher = $validation['voucher'];
+        $discountAmount = $validation['discount'];
+
+        // Store voucher in session
+        session([
+            'applied_voucher' => [
+                'id' => $voucher->id,
+                'code' => $voucher->code,
+                'name' => $voucher->name,
+                'type' => $voucher->type,
+                'amount' => $voucher->amount
+            ],
+            'voucher_discount_amount' => $discountAmount
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Mã voucher đã được lưu để áp dụng khi thanh toán'
+            'message' => 'Áp dụng voucher thành công',
+            'voucher' => [
+                'id' => $voucher->id,
+                'code' => $voucher->code,
+                'name' => $voucher->name,
+                'discount_text' => $voucher->getDiscountText()
+            ],
+            'discount_amount' => $discountAmount,
+            'formatted_discount' => number_format($discountAmount, 0, ',', '.') . 'đ',
+            'new_total' => $request->cart_total - $discountAmount,
+            'formatted_new_total' => number_format($request->cart_total - $discountAmount, 0, ',', '.') . 'đ'
         ]);
     }
 
     /**
-     * Remove voucher from session cart
+     * Remove voucher from cart
      */
     public function removeFromCart()
     {
-        session()->forget('voucher_code');
+        session()->forget(['applied_voucher', 'voucher_discount_amount']);
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã xóa mã voucher khỏi giỏ hàng'
+            'message' => 'Đã bỏ voucher khỏi giỏ hàng'
         ]);
     }
 
@@ -191,10 +244,18 @@ class VoucherController extends Controller
             ->orderBy('used_at', 'desc')
             ->paginate(10);
 
-        // Get available vouchers for user
-        $availableVouchers = $this->voucherService->getAvailableVouchersForUser($user);
+        // Calculate statistics
+        $stats = [
+            'total_used' => $user->voucherUsages()->count(),
+            'total_saved' => $user->voucherUsages()->sum('discount_amount'),
+            'avg_discount' => $user->voucherUsages()->avg('discount_amount') ?: 0,
+            'this_month' => $user->voucherUsages()
+                ->whereMonth('used_at', now()->month)
+                ->whereYear('used_at', now()->year)
+                ->count()
+        ];
 
-        return view('vouchers.my-vouchers', compact('usedVouchers', 'availableVouchers'));
+        return view('vouchers.my-vouchers', compact('usedVouchers', 'stats'));
     }
 
     /**

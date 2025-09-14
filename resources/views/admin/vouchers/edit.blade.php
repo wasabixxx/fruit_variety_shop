@@ -1,20 +1,21 @@
-@extends('admin.layouts.app')
+@extends('admin.layout')
 
-@section('title', 'Chỉnh sửa Voucher')
+@section('title', 'Chỉnh sửa Voucher - Admin Panel')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.show', $voucher) }}">{{ $voucher->code }}</a></li>
+    <li class="breadcrumb-item active">Chỉnh sửa</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="h3 mb-1">Chỉnh sửa Voucher</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.show', $voucher) }}">{{ $voucher->code }}</a></li>
-                    <li class="breadcrumb-item active">Chỉnh sửa</li>
-                </ol>
-            </nav>
+            <h1>Chỉnh sửa Voucher</h1>
+            <p class="page-subtitle">Cập nhật thông tin voucher: {{ $voucher->code }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.vouchers.show', $voucher) }}" class="btn btn-outline-info">
@@ -25,10 +26,11 @@
             </a>
         </div>
     </div>
+</div>
 
-    @if($voucher->used_count > 0)
-    <div class="alert alert-warning mb-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>
+@if($voucher->used_count > 0)
+<div class="alert alert-warning mb-4">
+    <i class="bi bi-exclamation-triangle me-2"></i>
         <strong>Lưu ý:</strong> Voucher này đã được sử dụng {{ $voucher->used_count }} lần. 
         Việc thay đổi một số thông tin có thể ảnh hưởng đến các đơn hàng đã áp dụng voucher.
     </div>

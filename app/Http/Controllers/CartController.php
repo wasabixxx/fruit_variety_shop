@@ -13,7 +13,12 @@ class CartController extends Controller
         $total = collect($cart)->sum(function($item) {
             return $item['price'] * $item['quantity'];
         });
-        return view('cart.index', compact('cart', 'total'));
+        
+        // Get applied voucher info
+        $appliedVoucher = session('applied_voucher');
+        $discountAmount = session('voucher_discount_amount', 0);
+        
+        return view('cart.index', compact('cart', 'total', 'appliedVoucher', 'discountAmount'));
     }
 
     // Thêm sản phẩm vào giỏ
@@ -60,9 +65,9 @@ class CartController extends Controller
     }
 
     // Xóa toàn bộ giỏ hàng
-    public function clear(Request $request)
+    public function clear()
     {
-        session()->forget('cart');
+        session()->forget(['cart', 'applied_voucher', 'voucher_discount_amount']);
         return back()->with('success', 'Đã xóa toàn bộ giỏ hàng!');
     }
 }

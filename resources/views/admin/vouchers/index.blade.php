@@ -1,35 +1,38 @@
-@extends('admin.layouts.app')
+@extends('admin.layout')
 
-@section('title', 'Quản lý Voucher')
+@section('title', 'Quản lý Voucher - Admin Panel')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Quản lý Voucher</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="h3 mb-1">Quản lý Voucher</h1>
-            <p class="text-muted mb-0">Quản lý mã giảm giá và khuyến mãi</p>
+            <h1>Quản lý Voucher</h1>
+            <p class="page-subtitle">Quản lý mã giảm giá và khuyến mãi</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.vouchers.export') }}" class="btn btn-outline-success">
                 <i class="bi bi-download me-2"></i>Xuất CSV
             </a>
             <a href="{{ route('admin.vouchers.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-2"></i>Tạo Voucher
+                <i class="bi bi-plus-circle me-2"></i>Tạo Voucher
             </a>
         </div>
     </div>
+</div>
 
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="bi bi-funnel me-2"></i>Bộ lọc
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.vouchers.index') }}">
-                <div class="row g-3">
+<!-- Filters -->
+<div class="admin-card card mb-4">
+    <div class="admin-card-body">
+        <h5 class="card-title mb-3">
+            <i class="bi bi-funnel me-2"></i>Bộ lọc
+        </h5>
+        <form method="GET" action="{{ route('admin.vouchers.index') }}" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Tìm kiếm</label>
                         <input type="text" name="search" class="form-control" 
@@ -71,38 +74,38 @@
     </div>
 
     <!-- Vouchers Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">
-                <i class="bi bi-ticket-perforated me-2"></i>Danh sách Voucher
-            </h5>
-            @if($vouchers->count() > 0)
-            <div class="d-flex align-items-center gap-2">
-                <small class="text-muted">{{ $vouchers->total() }} voucher</small>
-                <div class="dropdown">
-                    <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots me-1"></i>Thao tác
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="selectAllVouchers()">
-                            <i class="bi bi-check2-square me-2"></i>Chọn tất cả
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="bulkAction('activate')">
-                            <i class="bi bi-play-circle me-2"></i>Kích hoạt
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="bulkAction('deactivate')">
-                            <i class="bi bi-pause-circle me-2"></i>Tạm dừng
-                        </a></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="bulkAction('delete')">
-                            <i class="bi bi-trash me-2"></i>Xóa
-                        </a></li>
-                    </ul>
+    <div class="admin-card card">
+        <div class="admin-card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-ticket-perforated me-2"></i>Danh sách Voucher
+                </h5>
+                @if($vouchers->count() > 0)
+                <div class="d-flex align-items-center gap-2">
+                    <small class="text-muted">{{ $vouchers->total() }} voucher</small>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots me-1"></i>Thao tác
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="selectAllVouchers()">
+                                <i class="bi bi-check2-square me-2"></i>Chọn tất cả
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="bulkAction('activate')">
+                                <i class="bi bi-play-circle me-2"></i>Kích hoạt
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="bulkAction('deactivate')">
+                                <i class="bi bi-pause-circle me-2"></i>Tạm dừng
+                            </a></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="bulkAction('delete')">
+                                <i class="bi bi-trash me-2"></i>Xóa
+                            </a></li>
+                        </ul>
+                    </div>
                 </div>
+                @endif
             </div>
-            @endif
-        </div>
-        <div class="card-body p-0">
             @if($vouchers->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover mb-0">

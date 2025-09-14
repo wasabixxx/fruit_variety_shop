@@ -369,6 +369,11 @@
                             <i class="bi bi-bag me-1"></i>Sản phẩm
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::is('vouchers') ? 'active' : '' }}" href="{{ route('vouchers.index') }}">
+                            <i class="bi bi-ticket-perforated me-1"></i>Voucher
+                        </a>
+                    </li>
                 </ul>
                 
                 <ul class="navbar-nav ms-auto align-items-center">
@@ -416,6 +421,11 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ route('orders.my-orders') }}">
                                         <i class="bi bi-clock-history me-2"></i>Lịch sử đơn hàng
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('vouchers.my-vouchers') }}">
+                                        <i class="bi bi-ticket-perforated me-2"></i>Voucher của tôi
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>

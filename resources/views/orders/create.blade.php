@@ -21,8 +21,26 @@
                         </li>
                         @endforeach
                     </ul>
+                    
+                    <!-- Voucher Summary -->
+                    @if($appliedVoucher && $discountAmount > 0)
+                    <div class="border-top pt-3 mb-3">
+                        <div class="d-flex justify-content-between text-muted mb-2">
+                            <span>Tạm tính:</span>
+                            <span>{{ number_format($subtotal, 0, ',', '.') }}đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-success mb-2">
+                            <div>
+                                <i class="bi bi-ticket-perforated me-1"></i>
+                                <span>Giảm giá ({{ $appliedVoucher['code'] }}):</span>
+                            </div>
+                            <span>-{{ number_format($discountAmount, 0, ',', '.') }}đ</span>
+                        </div>
+                    </div>
+                    @endif
+                    
                     <div class="text-end">
-                        <h4>Tổng cộng: <span class="text-success">{{ number_format($total) }} VNĐ</span></h4>
+                        <h4>Tổng cộng: <span class="text-success">{{ number_format($total, 0, ',', '.') }}đ</span></h4>
                     </div>
                 </div>
             </div>

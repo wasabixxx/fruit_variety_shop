@@ -113,7 +113,7 @@
                                 <div class="fw-bold text-dark mb-2">
                                     {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}đ
                                 </div>
-                                <form method="POST" action="{{ route('cart.remove', $item['id']) }}">
+                                <form method="POST" action="{{ route('cart.remove.product', $item['id']) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-outline-danger btn-sm" 
                                             onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
@@ -154,10 +154,63 @@
                         
                         <hr>
                         
+                        <!-- Voucher Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-ticket-perforated me-2"></i>Mã giảm giá
+                            </h6>
+                            
+                            <!-- Voucher Input -->
+                            <form id="voucherForm" class="mb-3">
+                                @csrf
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="voucherCode" 
+                                           placeholder="Nhập mã giảm giá" maxlength="50">
+                                    <button class="btn btn-outline-primary" type="submit" id="applyVoucherBtn">
+                                        <i class="bi bi-check-circle me-1"></i>Áp dụng
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Applied Voucher Display -->
+                            <div id="appliedVoucher" style="display: none;">
+                                <div class="alert alert-success d-flex align-items-center justify-content-between p-2 mb-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <div>
+                                            <small class="fw-bold d-block" id="appliedVoucherName"></small>
+                                            <small class="text-muted" id="appliedVoucherDiscount"></small>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="removeVoucherBtn">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Voucher Error -->
+                            <div id="voucherError" class="alert alert-danger p-2 mt-2" style="display: none;">
+                                <small><i class="bi bi-exclamation-circle me-1"></i><span id="voucherErrorText"></span></small>
+                            </div>
+                            
+                            <!-- Available Vouchers -->
+                            <div class="mt-3">
+                                <small class="text-muted d-block mb-2">Voucher có sẵn:</small>
+                                <div id="availableVouchers" class="d-flex flex-wrap gap-1">
+                                    <!-- Vouchers sẽ được load qua AJAX -->
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Pricing Breakdown -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="text-muted">Tạm tính:</span>
-                            <span class="fw-semibold">{{ number_format($total, 0, ',', '.') }}đ</span>
+                            <span class="fw-semibold" id="subtotal">{{ number_format($total, 0, ',', '.') }}đ</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2" id="discountRow" style="display: none;">
+                            <span class="text-muted">Giảm giá:</span>
+                            <span class="fw-semibold text-success" id="discountAmount">-0đ</span>
                         </div>
                         
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -169,7 +222,7 @@
                         
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <span class="fw-bold fs-5">Tổng cộng:</span>
-                            <span class="fw-bold fs-4 text-primary">{{ number_format($total, 0, ',', '.') }}đ</span>
+                            <span class="fw-bold fs-4 text-primary" id="finalTotal">{{ number_format($total, 0, ',', '.') }}đ</span>
                         </div>
                         
                         <!-- Action Buttons -->
@@ -250,6 +303,205 @@
 }
 
 .cart-item:hover {
+    background-color: #f8f9fa;
+}
+
+.voucher-badge {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.voucher-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+
+@push('scripts')
+<script>
+let currentVoucher = @json($appliedVoucher ?? null);
+let cartSubtotal = {{ $total }};
+let currentDiscountAmount = {{ $discountAmount ?? 0 }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadAvailableVouchers();
+    
+    // Show applied voucher if exists
+    if (currentVoucher && currentDiscountAmount > 0) {
+        showAppliedVoucher(currentVoucher, currentDiscountAmount);
+        updateCartTotals(currentDiscountAmount);
+    }
+    
+    // Voucher form submission
+    document.getElementById('voucherForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        applyVoucher();
+    });
+    
+    // Remove voucher
+    document.getElementById('removeVoucherBtn').addEventListener('click', function() {
+        removeVoucher();
+    });
+});
+
+// Load available vouchers
+function loadAvailableVouchers() {
+    fetch('{{ route("vouchers.available") }}')
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('availableVouchers');
+        container.innerHTML = '';
+        
+        if (data.vouchers && data.vouchers.length > 0) {
+            data.vouchers.forEach(voucher => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-primary voucher-badge me-1 mb-1';
+                badge.style.cursor = 'pointer';
+                badge.innerHTML = `<i class="bi bi-tag me-1"></i>${voucher.code}`;
+                badge.title = `${voucher.name} - Giảm ${voucher.discount_text}`;
+                badge.onclick = () => {
+                    document.getElementById('voucherCode').value = voucher.code;
+                    applyVoucher();
+                };
+                container.appendChild(badge);
+            });
+        } else {
+            container.innerHTML = '<small class="text-muted">Không có voucher nào khả dụng</small>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading vouchers:', error);
+    });
+}
+
+// Apply voucher
+function applyVoucher() {
+    const code = document.getElementById('voucherCode').value.trim();
+    if (!code) return;
+    
+    const btn = document.getElementById('applyVoucherBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Đang xử lý...';
+    btn.disabled = true;
+    
+    // Hide previous errors
+    document.getElementById('voucherError').style.display = 'none';
+    
+    fetch('{{ route("vouchers.cart.apply") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            voucher_code: code,
+            cart_total: cartSubtotal
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentVoucher = data.voucher;
+            showAppliedVoucher(data.voucher, data.discount_amount);
+            updateCartTotals(data.discount_amount);
+            document.getElementById('voucherCode').value = '';
+        } else {
+            showVoucherError(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error applying voucher:', error);
+        showVoucherError('Có lỗi xảy ra khi áp dụng voucher');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+// Remove voucher
+function removeVoucher() {
+    fetch('{{ route("vouchers.cart.remove") }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentVoucher = null;
+            hideAppliedVoucher();
+            updateCartTotals(0);
+        }
+    })
+    .catch(error => {
+        console.error('Error removing voucher:', error);
+    });
+}
+
+// Show applied voucher
+function showAppliedVoucher(voucher, discountAmount) {
+    document.getElementById('appliedVoucherName').textContent = voucher.name;
+    document.getElementById('appliedVoucherDiscount').textContent = `Giảm ${formatCurrency(discountAmount)}`;
+    document.getElementById('appliedVoucher').style.display = 'block';
+}
+
+// Hide applied voucher
+function hideAppliedVoucher() {
+    document.getElementById('appliedVoucher').style.display = 'none';
+}
+
+// Show voucher error
+function showVoucherError(message) {
+    document.getElementById('voucherErrorText').textContent = message;
+    document.getElementById('voucherError').style.display = 'block';
+}
+
+// Update cart totals
+function updateCartTotals(discountAmount) {
+    const discountRow = document.getElementById('discountRow');
+    const discountAmountEl = document.getElementById('discountAmount');
+    const finalTotal = document.getElementById('finalTotal');
+    
+    if (discountAmount > 0) {
+        discountRow.style.display = 'flex';
+        discountAmountEl.textContent = '-' + formatCurrency(discountAmount);
+        finalTotal.textContent = formatCurrency(cartSubtotal - discountAmount);
+    } else {
+        discountRow.style.display = 'none';
+        finalTotal.textContent = formatCurrency(cartSubtotal);
+    }
+}
+
+// Format currency
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+}
+
+// Quantity functions
+function increaseQuantity(btn, maxStock) {
+    const input = btn.parentElement.querySelector('.quantity-input');
+    const currentValue = parseInt(input.value);
+    if (currentValue < maxStock) {
+        input.value = currentValue + 1;
+    }
+}
+
+function decreaseQuantity(btn) {
+    const input = btn.parentElement.querySelector('.quantity-input');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+        input.value = currentValue - 1;
+    }
+}
+</script>
+@endpush
+
+@push('styles')
+<style>
+.cart-item:hover {
     background-color: rgba(0,0,0,0.02);
 }
 
@@ -284,22 +536,6 @@
     }
 }
 </style>
+@endpush
 
-<script>
-function increaseQuantity(btn, maxStock) {
-    const input = btn.parentElement.querySelector('.quantity-input');
-    const currentValue = parseInt(input.value);
-    if (currentValue < maxStock) {
-        input.value = currentValue + 1;
-    }
-}
-
-function decreaseQuantity(btn) {
-    const input = btn.parentElement.querySelector('.quantity-input');
-    const currentValue = parseInt(input.value);
-    if (currentValue > 1) {
-        input.value = currentValue - 1;
-    }
-}
-</script>
 @endsection

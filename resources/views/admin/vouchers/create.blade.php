@@ -1,34 +1,36 @@
-@extends('admin.layouts.app')
+@extends('admin.layout')
 
-@section('title', 'Tạo Voucher')
+@section('title', 'Tạo Voucher - Admin Panel')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
+    <li class="breadcrumb-item active">Tạo mới</li>
+@endsection
 
 @section('content')
-<div class="container-fluid">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Page Title -->
+<div class="page-title">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1 class="h3 mb-1">Tạo Voucher</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.vouchers.index') }}">Quản lý Voucher</a></li>
-                    <li class="breadcrumb-item active">Tạo mới</li>
-                </ol>
-            </nav>
+            <h1>Tạo Voucher</h1>
+            <p class="page-subtitle">Tạo mã giảm giá mới cho khách hàng</p>
         </div>
         <a href="{{ route('admin.vouchers.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Quay lại
         </a>
     </div>
+</div>
 
-    <form action="{{ route('admin.vouchers.store') }}" method="POST" id="voucherForm">
-        @csrf
-        <div class="row">
-            <!-- Left Column -->
-            <div class="col-lg-8">
-                <!-- Basic Information -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
+<form action="{{ route('admin.vouchers.store') }}" method="POST" id="voucherForm">
+    @csrf
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="admin-card card mb-4">
+                <div class="admin-card-body">
+                    <h5 class="card-title mb-3">
                             <i class="bi bi-info-circle me-2"></i>Thông tin cơ bản
                         </h5>
                     </div>
