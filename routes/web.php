@@ -5,10 +5,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminVoucherController;
+use App\Http\Controllers\Admin\AdminPageController;
 use App\Http\Controllers\Admin\ChartController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WishlistController;
@@ -187,6 +189,21 @@ Route::middleware('auth')->prefix('vouchers')->name('vouchers.')->group(function
 });
 
 // ============================================================================
+// CMS PAGES - Trang tĩnh
+// ============================================================================
+
+// Specific static pages
+Route::get('/about', [PageController::class, 'about'])->name('pages.about');
+Route::get('/contact', [PageController::class, 'contact'])->name('pages.contact');
+Route::post('/contact', [PageController::class, 'submitContact'])->name('pages.contact.submit');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('pages.privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('pages.terms');
+
+// Dynamic pages (must be last)
+Route::get('/pages', [PageController::class, 'index'])->name('pages.index');
+Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
+
+// ============================================================================
 // ADMIN ROUTES - Quản trị viên
 // ============================================================================
 
@@ -285,6 +302,24 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/top-products', [ChartController::class, 'topProducts'])->name('top-products');
         Route::get('/category-stats', [ChartController::class, 'categoryStats'])->name('category-stats');
         Route::get('/statistics', [ChartController::class, 'statistics'])->name('statistics');
+    });
+    
+    // ========================================================================
+    // CMS PAGES - Quản lý nội dung
+    // ========================================================================
+    Route::prefix('pages')->name('pages.')->group(function() {
+        Route::get('/', [AdminPageController::class, 'index'])->name('index');
+        Route::get('/create', [AdminPageController::class, 'create'])->name('create');
+        Route::post('/', [AdminPageController::class, 'store'])->name('store');
+        Route::get('/{page}', [AdminPageController::class, 'show'])->name('show');
+        Route::get('/{page}/edit', [AdminPageController::class, 'edit'])->name('edit');
+        Route::put('/{page}', [AdminPageController::class, 'update'])->name('update');
+        Route::delete('/{page}', [AdminPageController::class, 'destroy'])->name('destroy');
+        Route::patch('/{page}/toggle-status', [AdminPageController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/{page}/preview', [AdminPageController::class, 'preview'])->name('preview');
+        Route::post('/{page}/duplicate', [AdminPageController::class, 'duplicate'])->name('duplicate');
+        Route::post('/bulk-action', [AdminPageController::class, 'bulkAction'])->name('bulk-action');
+        Route::get('/api/statistics', [AdminPageController::class, 'getStatistics'])->name('api.statistics');
     });
     
     // ========================================================================

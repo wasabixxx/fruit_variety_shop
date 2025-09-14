@@ -160,7 +160,7 @@
                             <span class="h5 fw-bold text-primary mb-0">
                                 {{ number_format($product->price, 0, ',', '.') }}đ
                             </span>
-                            <small class="text-muted d-block">/ kg</small>
+                            <small class="text-muted d-block">/ gói</small>
                         </div>
                         <div class="text-end">
                             <small class="text-muted d-block">Còn lại</small>

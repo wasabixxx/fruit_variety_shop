@@ -46,24 +46,24 @@
                 <div class="card-body p-0">
                     @foreach($cart as $item)
                     <div class="cart-item border-bottom p-4 {{ !$loop->last ? 'border-bottom' : '' }}">
-                        <div class="row align-items-center">
+                        <div class="row align-items-center g-3">
                             <!-- Product Image -->
-                            <div class="col-md-2 col-3 mb-3 mb-md-0">
+                            <div class="col-auto">
                                 @if($item['image'])
                                     <img src="{{ $item['image'] }}" 
                                          alt="{{ $item['name'] }}" 
                                          class="img-fluid rounded-3 shadow-sm"
-                                         style="height: 80px; width: 100%; object-fit: cover;">
+                                         style="height: 80px; width: 80px; object-fit: cover;">
                                 @else
                                     <div class="bg-light d-flex align-items-center justify-content-center rounded-3" 
-                                         style="height: 80px;">
+                                         style="height: 80px; width: 80px;">
                                         <i class="bi bi-image text-muted fs-3"></i>
                                     </div>
                                 @endif
                             </div>
                             
                             <!-- Product Info -->
-                            <div class="col-md-4 col-9 mb-3 mb-md-0">
+                            <div class="col">
                                 <h6 class="fw-bold mb-1">{{ $item['name'] }}</h6>
                                 <div class="d-flex align-items-center text-muted small">
                                     <i class="bi bi-check-circle me-1"></i>
@@ -73,51 +73,59 @@
                                         <span class="text-danger">Hết hàng</span>
                                     @endif
                                 </div>
+                                <!-- Price on mobile -->
+                                <div class="d-md-none mt-1">
+                                    <span class="fw-bold text-primary">
+                                        {{ number_format($item['price'], 0, ',', '.') }}đ
+                                    </span>
+                                    <small class="text-muted">/ gói</small>
+                                </div>
                             </div>
                             
-                            <!-- Price -->
-                            <div class="col-md-2 col-4 mb-3 mb-md-0 text-center">
-                                <div class="fw-bold text-primary fs-6">
+                            <!-- Price (Desktop only) -->
+                            <div class="col-auto d-none d-md-block text-end">
+                                <div class="fw-bold text-primary">
                                     {{ number_format($item['price'], 0, ',', '.') }}đ
                                 </div>
-                                <small class="text-muted">/ kg</small>
+                                <small class="text-muted">/ gói</small>
                             </div>
                             
                             <!-- Quantity Controls -->
-                            <div class="col-md-3 col-4 mb-3 mb-md-0">
-                                <form method="POST" action="{{ route('cart.update', $item['id']) }}" 
-                                      class="d-flex align-items-center justify-content-center">
+                            <div class="col-auto">
+                                <form method="POST" action="{{ route('cart.update', $item['id']) }}">
                                     @csrf
-                                    <div class="input-group" style="max-width: 120px;">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
-                                                onclick="decreaseQuantity(this)">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" name="quantity" 
-                                               value="{{ $item['quantity'] }}" 
-                                               min="1" max="{{ $item['stock'] }}" 
-                                               class="form-control form-control-sm text-center quantity-input">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
-                                                onclick="increaseQuantity(this, {{ $item['stock'] }})">
-                                            <i class="bi bi-plus"></i>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="input-group" style="width: 130px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
+                                                    onclick="decreaseQuantity(this)">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <input type="number" name="quantity" 
+                                                   value="{{ $item['quantity'] }}" 
+                                                   min="1" max="{{ $item['stock'] }}" 
+                                                   class="form-control form-control-sm text-center quantity-input">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
+                                                    onclick="increaseQuantity(this, {{ $item['stock'] }})">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-arrow-clockwise"></i>
                                         </button>
                                     </div>
-                                    <button type="submit" class="btn btn-primary btn-sm ms-2">
-                                        <i class="bi bi-arrow-clockwise"></i>
-                                    </button>
                                 </form>
                             </div>
                             
                             <!-- Subtotal & Remove -->
-                            <div class="col-md-1 col-4 text-end">
-                                <div class="fw-bold text-dark mb-2">
+                            <div class="col-auto text-end">
+                                <div class="fw-bold text-dark mb-2 text-nowrap">
                                     {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}đ
                                 </div>
                                 <form method="POST" action="{{ route('cart.remove.product', $item['id']) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-outline-danger btn-sm" 
                                             onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
-                                        <i class="bi bi-x"></i>
+                                        <i class="bi bi-x-lg"></i>
                                     </button>
                                 </form>
                             </div>
@@ -512,12 +520,14 @@ function decreaseQuantity(btn) {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid #dee2e6;
 }
 
 .quantity-input {
     width: 60px;
     border-left: 0;
     border-right: 0;
+    text-align: center;
 }
 
 .quantity-input:focus {
@@ -529,10 +539,37 @@ function decreaseQuantity(btn) {
     z-index: 10;
 }
 
+.cart-item {
+    transition: background-color 0.2s ease;
+}
+
+.cart-item .row {
+    min-height: 100px;
+}
+
+/* Ensure proper spacing on mobile */
 @media (max-width: 768px) {
     .sticky-top {
         position: relative !important;
         top: auto !important;
+    }
+    
+    .cart-item .row {
+        min-height: auto;
+    }
+    
+    .cart-item {
+        padding: 1rem !important;
+    }
+    
+    .quantity-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .quantity-input {
+        width: 50px;
+        font-size: 0.875rem;
     }
 }
 </style>

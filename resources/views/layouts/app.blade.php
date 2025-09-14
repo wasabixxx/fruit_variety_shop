@@ -529,7 +529,7 @@
                     <h5 class="fw-bold mb-3 text-white">
                         <i class="bi bi-flower1 me-2 text-primary"></i>Fruit Variety Shop
                     </h5>
-                    <p class="text-white-50">Chuyên cung cấp các loại trái cây tươi ngon, chất lượng cao từ các vùng trồng uy tín trên toàn quốc.</p>
+                    <p class="text-white-50">Chuyên cung cấp các loại hạt trái cây tươi ngon, chất lượng cao từ các vùng trồng uy tín trên toàn quốc.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-primary"><i class="bi bi-facebook fs-5"></i></a>
                         <a href="#" class="text-primary"><i class="bi bi-instagram fs-5"></i></a>
@@ -562,10 +562,10 @@
                             <i class="bi bi-geo-alt me-2"></i>123 Đường ABC, Quận 1, TP.HCM
                         </div>
                         <div class="mb-2">
-                            <i class="bi bi-telephone me-2"></i>(028) 123 456 789
+                            <i class="bi bi-telephone me-2"></i>0886 345 204
                         </div>
                         <div class="mb-2">
-                            <i class="bi bi-envelope me-2"></i>info@fruitvarietyshop.com
+                            <i class="bi bi-envelope me-2"></i>fruitvarietyshop@gmail.com
                         </div>
                         <div class="mb-2">
                             <i class="bi bi-clock me-2"></i>8:00 - 20:00 (Thứ 2 - Chủ nhật)

@@ -217,7 +217,7 @@ function createProductCard(product, type = 'user') {
                             <span class="h6 fw-bold text-primary mb-0">
                                 ${formatCurrency(product.price)}đ
                             </span>
-                            <small class="text-muted d-block">/ kg</small>
+                            <small class="text-muted d-block">/ gói</small>
                         </div>
                     </div>
                     
@@ -296,7 +296,7 @@ function createSimilarProductCard(product) {
                         <span class="h6 fw-bold text-primary mb-0">
                             ${formatCurrency(product.price)}đ
                         </span>
-                        <small class="text-muted d-block">/ kg</small>
+                        <small class="text-muted d-block">/ gói</small>
                     </div>
                 </div>
                 

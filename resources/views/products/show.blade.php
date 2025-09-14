@@ -203,7 +203,7 @@
                                             <span class="h6 fw-bold text-primary mb-0">
                                                 {{ number_format($similarProduct->price, 0, ',', '.') }}đ
                                             </span>
-                                            <small class="text-muted d-block">/ kg</small>
+                                            <small class="text-muted d-block">/ gói</small>
                                         </div>
                                         <div class="text-muted">
                                             @if($similarProduct->stock > 10)
