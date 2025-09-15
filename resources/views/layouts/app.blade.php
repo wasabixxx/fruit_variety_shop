@@ -374,6 +374,26 @@
                             <i class="bi bi-ticket-perforated me-1"></i>Voucher
                         </a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ Request::is('pages*') ? 'active' : '' }}" href="#" id="pagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-text me-1"></i>Thông tin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
+                            @php
+                                $headerPages = App\Models\Page::where('is_published', true)
+                                    ->where('show_in_menu', true)
+                                    ->orderBy('menu_order')
+                                    ->get();
+                            @endphp
+                            @foreach($headerPages as $page)
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('pages.show', $page->slug) }}">
+                                        {{ $page->title }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </li>
                 </ul>
                 
                 <ul class="navbar-nav ms-auto align-items-center">
@@ -549,17 +569,33 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-semibold mb-3 text-white">Hỗ trợ</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Liên hệ</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Hỏi đáp</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Chính sách đổi trả</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Vận chuyển</a></li>
+                        @php
+                            $footerPages = App\Models\Page::where('is_published', true)
+                                ->where('show_in_menu', true)
+                                ->orderBy('menu_order')
+                                ->limit(4)
+                                ->get();
+                        @endphp
+                        @foreach($footerPages as $page)
+                            <li class="mb-2">
+                                <a href="{{ route('pages.show', $page->slug) }}" class="text-decoration-none text-white-50 hover-text-white">
+                                    {{ $page->title }}
+                                </a>
+                            </li>
+                        @endforeach
+                        @if($footerPages->isEmpty())
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Liên hệ</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Hỏi đáp</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Chính sách đổi trả</a></li>
+                            <li class="mb-2"><a href="#" class="text-decoration-none text-white-50 hover-text-white">Vận chuyển</a></li>
+                        @endif
                     </ul>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <h6 class="fw-semibold mb-3 text-white">Liên hệ</h6>
                     <div class="text-white-50">
                         <div class="mb-2">
-                            <i class="bi bi-geo-alt me-2"></i>123 Đường ABC, Quận 1, TP.HCM
+                            <i class="bi bi-geo-alt me-2"></i>Số 1, 53/39 Ngoạ Long, Tây Tựu, Hà Nội
                         </div>
                         <div class="mb-2">
                             <i class="bi bi-telephone me-2"></i>0886 345 204

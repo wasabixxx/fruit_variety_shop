@@ -18,7 +18,7 @@ FAQ (Câu hỏi thường gặp): Cung cấp thông tin giải đáp thắc mắ
 Live Chat/Hỗ trợ trực tuyến: Tương tác trực tiếp với khách hàng.
 
 Hệ thống Ticket: Quản lý các yêu cầu hỗ trợ.
- Quản lý nội dung (CMS - Content Management System):
+ Quản lý nội dung (CMS - Content Management System): OK
 Quản lý các trang tĩnh (về chúng tôi, liên hệ, chính sách). OK
 
 Blog hoặc tin tức liên quan đến sản phẩm/ngành hàng.

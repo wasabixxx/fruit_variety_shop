@@ -64,6 +64,14 @@
             </li>
             
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}" 
+                   href="{{ route('admin.pages.index') }}">
+                    <i class="bi bi-file-text"></i>
+                    <span>Quản lý Trang</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
                    href="{{ route('admin.reports.index') }}">
                     <i class="bi bi-graph-up"></i>
