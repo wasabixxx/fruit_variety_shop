@@ -119,4 +119,15 @@ class User extends Authenticatable
         $this->update(['email_verification_token' => $token]);
         return $token;
     }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\CustomResetPasswordNotification($token));
+    }
 }

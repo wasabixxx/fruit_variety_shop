@@ -33,45 +33,44 @@
             <i class="bi bi-funnel me-2"></i>Bộ lọc
         </h5>
         <form method="GET" action="{{ route('admin.vouchers.index') }}" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Tìm kiếm</label>
-                        <input type="text" name="search" class="form-control" 
-                               value="{{ request('search') }}" 
-                               placeholder="Mã voucher, tên...">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Trạng thái</label>
-                        <select name="status" class="form-select">
-                            <option value="">Tất cả</option>
-                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Hoạt động</option>
-                            <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Hết hạn</option>
-                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Tạm dừng</option>
-                            <option value="used_up" {{ request('status') === 'used_up' ? 'selected' : '' }}>Hết lượt</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Loại</label>
-                        <select name="type" class="form-select">
-                            <option value="">Tất cả</option>
-                            <option value="percentage" {{ request('type') === 'percentage' ? 'selected' : '' }}>Phần trăm</option>
-                            <option value="fixed" {{ request('type') === 'fixed' ? 'selected' : '' }}>Cố định</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search me-1"></i>Lọc
-                            </button>
-                            <a href="{{ route('admin.vouchers.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Reset
-                            </a>
-                        </div>
-                    </div>
+            <div class="col-md-3">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" name="search" class="form-control" 
+                       value="{{ request('search') }}" 
+                       placeholder="Mã voucher, tên...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Trạng thái</label>
+                <select name="status" class="form-select">
+                    <option value="">Tất cả</option>
+                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Hoạt động</option>
+                    <option value="expired" {{ request('status') === 'expired' ? 'selected' : '' }}>Hết hạn</option>
+                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Tạm dừng</option>
+                    <option value="used_up" {{ request('status') === 'used_up' ? 'selected' : '' }}>Hết lượt</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Loại</label>
+                <select name="type" class="form-select">
+                    <option value="">Tất cả</option>
+                    <option value="percentage" {{ request('type') === 'percentage' ? 'selected' : '' }}>Phần trăm</option>
+                    <option value="fixed" {{ request('type') === 'fixed' ? 'selected' : '' }}>Cố định</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i>Lọc
+                    </button>
+                    <a href="{{ route('admin.vouchers.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                    </a>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- Vouchers Table -->
     <div class="admin-card card">
@@ -264,7 +263,6 @@
             @endif
         </div>
     </div>
-</div>
 
 <!-- Bulk Actions Form -->
 <form id="bulkActionForm" method="POST" action="{{ route('admin.vouchers.bulk-action') }}" style="display: none;">

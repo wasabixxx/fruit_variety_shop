@@ -245,7 +245,7 @@
                     @if($page->is_published)
                         <form action="{{ route('admin.pages.toggle-status', $page) }}" method="POST" class="d-inline">
                             @csrf
-                            @method('PATCH')
+                            @method('PUT')
                             <button type="submit" class="btn btn-outline-warning w-100">
                                 <i class="bi bi-eye-slash"></i> Ẩn trang
                             </button>
@@ -253,7 +253,7 @@
                     @else
                         <form action="{{ route('admin.pages.toggle-status', $page) }}" method="POST" class="d-inline">
                             @csrf
-                            @method('PATCH')
+                            @method('PUT')
                             <button type="submit" class="btn btn-outline-success w-100">
                                 <i class="bi bi-eye"></i> Xuất bản
                             </button>

@@ -76,6 +76,12 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Password Reset Routes
+Route::get('/password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
 // Email verification
 Route::get('/email/verify/{token}', [AuthController::class, 'verifyEmail'])->name('email.verify');
 Route::get('/email/verify', [AuthController::class, 'showVerificationNotice'])->name('email.verification.notice')->middleware('auth');
@@ -309,18 +315,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // CMS PAGES - Quản lý nội dung
     // ========================================================================
     Route::prefix('pages')->name('pages.')->group(function() {
+        // Static routes không có parameters
         Route::get('/', [AdminPageController::class, 'index'])->name('index');
         Route::get('/create', [AdminPageController::class, 'create'])->name('create');
         Route::post('/', [AdminPageController::class, 'store'])->name('store');
-        Route::get('/{page}', [AdminPageController::class, 'show'])->name('show');
-        Route::get('/{page}/edit', [AdminPageController::class, 'edit'])->name('edit');
-        Route::put('/{page}', [AdminPageController::class, 'update'])->name('update');
-        Route::delete('/{page}', [AdminPageController::class, 'destroy'])->name('destroy');
-        Route::patch('/{page}/toggle-status', [AdminPageController::class, 'toggleStatus'])->name('toggle-status');
-        Route::get('/{page}/preview', [AdminPageController::class, 'preview'])->name('preview');
-        Route::post('/{page}/duplicate', [AdminPageController::class, 'duplicate'])->name('duplicate');
         Route::post('/bulk-action', [AdminPageController::class, 'bulkAction'])->name('bulk-action');
         Route::get('/api/statistics', [AdminPageController::class, 'getStatistics'])->name('api.statistics');
+        
+        // Explicit routes for specific actions (must come before generic {page} routes)
+        Route::put('/toggle-status/{page}', [AdminPageController::class, 'toggleStatus'])->name('toggle-status')->where('page', '[0-9]+');
+        Route::get('/preview/{page}', [AdminPageController::class, 'preview'])->name('preview')->where('page', '[0-9]+');
+        Route::post('/duplicate/{page}', [AdminPageController::class, 'duplicate'])->name('duplicate')->where('page', '[0-9]+');
+        Route::get('/edit/{page}', [AdminPageController::class, 'edit'])->name('edit')->where('page', '[0-9]+');
+        
+        // Basic CRUD routes last
+        Route::get('/{page}', [AdminPageController::class, 'show'])->name('show')->where('page', '[0-9]+');
+        Route::put('/{page}', [AdminPageController::class, 'update'])->name('update')->where('page', '[0-9]+');
+        Route::delete('/{page}', [AdminPageController::class, 'destroy'])->name('destroy')->where('page', '[0-9]+');
     });
     
     // ========================================================================

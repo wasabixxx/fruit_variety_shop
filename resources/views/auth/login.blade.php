@@ -55,6 +55,11 @@
                             </label>
                             <input type="password" class="form-control form-control-lg" id="password" name="password" 
                                    required placeholder="Nhập mật khẩu">
+                            <div class="text-end mt-2">
+                                <a href="{{ route('password.request') }}" class="text-decoration-none text-muted small">
+                                    <i class="bi bi-question-circle"></i> Quên mật khẩu?
+                                </a>
+                            </div>
                         </div>
                         
                         <div class="d-grid mb-3">

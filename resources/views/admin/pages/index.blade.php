@@ -226,11 +226,15 @@
                                     <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-outline-primary" title="Chỉnh sửa">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-{{ $page->is_published ? 'warning' : 'success' }}" 
-                                            onclick="toggleStatus({{ $page->id }})" 
-                                            title="{{ $page->is_published ? 'Hủy xuất bản' : 'Xuất bản' }}">
-                                        <i class="bi bi-{{ $page->is_published ? 'pause' : 'play' }}-circle"></i>
-                                    </button>
+                                    <form method="POST" action="{{ route('admin.pages.toggle-status', $page) }}" class="d-inline">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="btn btn-outline-{{ $page->is_published ? 'warning' : 'success' }}" 
+                                                onclick="return confirm('Bạn có chắc chắn muốn thay đổi trạng thái trang này?')"
+                                                title="{{ $page->is_published ? 'Hủy xuất bản' : 'Xuất bản' }}">
+                                            <i class="bi bi-{{ $page->is_published ? 'pause' : 'play' }}-circle"></i>
+                                        </button>
+                                    </form>
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" 
                                                 data-bs-toggle="dropdown"></button>
@@ -238,13 +242,28 @@
                                             <li><a class="dropdown-item" href="{{ route('admin.pages.preview', $page) }}" target="_blank">
                                                 <i class="bi bi-eye"></i> Xem trước
                                             </a></li>
-                                            <li><a class="dropdown-item" href="#" onclick="duplicatePage({{ $page->id }})">
-                                                <i class="bi bi-files"></i> Sao chép
-                                            </a></li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.pages.duplicate', $page) }}" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item" 
+                                                            onclick="return confirm('Bạn có muốn sao chép trang này?')"
+                                                            style="border: none; background: none; width: 100%; text-align: left;">
+                                                        <i class="bi bi-files"></i> Sao chép
+                                                    </button>
+                                                </form>
+                                            </li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger" href="#" onclick="deletePage({{ $page->id }})">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </a></li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.pages.destroy', $page) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item text-danger" 
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa trang này? Hành động này không thể hoàn tác!')"
+                                                            style="border: none; background: none; width: 100%; text-align: left;">
+                                                        <i class="bi bi-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -278,25 +297,11 @@
     </div>
 </div>
 
-<!-- Hidden forms for actions -->
-<form id="statusForm" method="POST" style="display: none;">
-    @csrf
-    @method('PATCH')
-</form>
-
+<!-- Hidden forms for bulk actions only -->
 <form id="bulkForm" method="POST" action="{{ route('admin.pages.bulk-action') }}" style="display: none;">
     @csrf
     <input type="hidden" name="action" id="bulkAction">
     <input type="hidden" name="page_ids" id="bulkPageIds">
-</form>
-
-<form id="deleteForm" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
-</form>
-
-<form id="duplicateForm" method="POST" style="display: none;">
-    @csrf
 </form>
 @endsection
 
@@ -348,30 +353,6 @@ function bulkAction(action) {
         document.getElementById('bulkAction').value = action;
         document.getElementById('bulkPageIds').value = JSON.stringify(selectedIds);
         document.getElementById('bulkForm').submit();
-    }
-}
-
-function toggleStatus(pageId) {
-    if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái trang này?')) {
-        const form = document.getElementById('statusForm');
-        form.action = `/admin/pages/${pageId}/toggle-status`;
-        form.submit();
-    }
-}
-
-function deletePage(pageId) {
-    if (confirm('Bạn có chắc chắn muốn xóa trang này? Hành động này không thể hoàn tác!')) {
-        const form = document.getElementById('deleteForm');
-        form.action = `/admin/pages/${pageId}`;
-        form.submit();
-    }
-}
-
-function duplicatePage(pageId) {
-    if (confirm('Bạn có muốn sao chép trang này?')) {
-        const form = document.getElementById('duplicateForm');
-        form.action = `/admin/pages/${pageId}/duplicate`;
-        form.submit();
     }
 }
 </script>
