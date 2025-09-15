@@ -95,15 +95,20 @@
                                 <form method="POST" action="{{ route('cart.update', $item['id']) }}">
                                     @csrf
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="input-group" style="width: 130px;">
+                                        <div class="input-group" style="width: 150px;">
                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
                                                     onclick="decreaseQuantity(this)">
                                                 <i class="bi bi-dash"></i>
                                             </button>
-                                            <input type="number" name="quantity" 
+                                            <input type="number" 
+                                                   name="quantity" 
                                                    value="{{ $item['quantity'] }}" 
-                                                   min="1" max="{{ $item['stock'] }}" 
-                                                   class="form-control form-control-sm text-center quantity-input">
+                                                   min="1" 
+                                                   max="{{ $item['stock'] }}" 
+                                                   class="form-control form-control-sm text-center quantity-input"
+                                                   data-quantity="{{ $item['quantity'] }}"
+                                                   autocomplete="off"
+                                                   style="background-color: white !important; color: #000 !important; font-weight: 500;">
                                             <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" 
                                                     onclick="increaseQuantity(this, {{ $item['stock'] }})">
                                                 <i class="bi bi-plus"></i>
@@ -340,6 +345,19 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCartTotals(currentDiscountAmount);
     }
     
+    // Ensure all quantity inputs show their values
+    document.querySelectorAll('.quantity-input').forEach(function(input) {
+        const value = input.getAttribute('value') || input.getAttribute('data-quantity');
+        if (value) {
+            input.value = value;
+            input.setAttribute('value', value);
+            // Force re-render
+            input.style.display = 'none';
+            input.offsetHeight; // trigger reflow
+            input.style.display = 'block';
+        }
+    });
+    
     // Voucher form submission
     document.getElementById('voucherForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -524,15 +542,32 @@ function decreaseQuantity(btn) {
 }
 
 .quantity-input {
-    width: 60px;
+    width: 80px;
     border-left: 0;
     border-right: 0;
     text-align: center;
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    background-color: white !important;
+    color: #000 !important;
+    font-weight: 500;
+    min-width: 80px;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .quantity-input:focus {
     box-shadow: none;
     border-color: #dee2e6;
+    background-color: white !important;
+    color: #000 !important;
 }
 
 .sticky-top {
@@ -568,8 +603,9 @@ function decreaseQuantity(btn) {
     }
     
     .quantity-input {
-        width: 50px;
+        width: 70px;
         font-size: 0.875rem;
+        min-width: 70px;
     }
 }
 </style>

@@ -185,4 +185,14 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    /*
+    |--------------------------------------------------------------------------
+    | MoMo Payment Configuration
+    |--------------------------------------------------------------------------
+    */
+    'momo_endpoint' => env('MOMO_ENDPOINT'),
+    'momo_partner_code' => env('MOMO_PARTNER_CODE'),
+    'momo_access_key' => env('MOMO_ACCESS_KEY'),
+    'momo_secret_key' => env('MOMO_SECRET_KEY'),
+
 ];

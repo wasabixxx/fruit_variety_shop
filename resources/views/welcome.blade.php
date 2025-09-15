@@ -296,29 +296,25 @@
                 @foreach($popularProducts as $product)
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
-                        @if($product->hasImage())
-                            <div class="position-relative overflow-hidden">
-                                <img src="{{ $product->image_url }}" 
-                                     class="card-img-top object-fit-cover" 
-                                     alt="{{ $product->name }}"
-                                     style="height: 150px; transition: transform 0.3s ease;">
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-warning px-2 py-1 rounded-pill">
-                                        <i class="bi bi-fire me-1"></i>Hot
-                                    </span>
-                                </div>
+                        <div class="position-relative overflow-hidden">
+                            @php
+                                $imageUrl = $product->image;
+                                if ($imageUrl && !str_starts_with($imageUrl, 'http')) {
+                                    $imageUrl = asset('storage/' . $imageUrl);
+                                }
+                                $fallbackUrl = 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                            @endphp
+                            <img src="{{ $imageUrl ?: $fallbackUrl }}" 
+                                 class="card-img-top object-fit-cover" 
+                                 alt="{{ $product->name }}"
+                                 style="height: 150px; transition: transform 0.3s ease;"
+                                 onerror="this.src='{{ $fallbackUrl }}';">
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-warning px-2 py-1 rounded-pill">
+                                    <i class="bi bi-fire me-1"></i>Hot
+                                </span>
                             </div>
-                        @else
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
-                                 style="height: 150px;">
-                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-warning px-2 py-1 rounded-pill">
-                                        <i class="bi bi-fire me-1"></i>Hot
-                                    </span>
-                                </div>
-                            </div>
-                        @endif
+                        </div>
                         
                         <div class="card-body p-3">
                             <h6 class="card-title fw-bold mb-2 small">{{ Str::limit($product->name, 40) }}</h6>
@@ -351,29 +347,25 @@
                 @foreach($trendingProducts as $product)
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="card product-card h-100 border-0 shadow-sm position-relative overflow-hidden">
-                        @if($product->hasImage())
-                            <div class="position-relative overflow-hidden">
-                                <img src="{{ $product->image_url }}" 
-                                     class="card-img-top object-fit-cover" 
-                                     alt="{{ $product->name }}"
-                                     style="height: 150px; transition: transform 0.3s ease;">
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-info px-2 py-1 rounded-pill">
-                                        <i class="bi bi-trending-up me-1"></i>Trending
-                                    </span>
-                                </div>
+                        <div class="position-relative overflow-hidden">
+                            @php
+                                $imageUrl = $product->image;
+                                if ($imageUrl && !str_starts_with($imageUrl, 'http')) {
+                                    $imageUrl = asset('storage/' . $imageUrl);
+                                }
+                                $fallbackUrl = 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+                            @endphp
+                            <img src="{{ $imageUrl ?: $fallbackUrl }}" 
+                                 class="card-img-top object-fit-cover" 
+                                 alt="{{ $product->name }}"
+                                 style="height: 150px; transition: transform 0.3s ease;"
+                                 onerror="this.src='{{ $fallbackUrl }}';">
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-info px-2 py-1 rounded-pill">
+                                    <i class="bi bi-trending-up me-1"></i>Trending
+                                </span>
                             </div>
-                        @else
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center position-relative" 
-                                 style="height: 150px;">
-                                <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-info px-2 py-1 rounded-pill">
-                                        <i class="bi bi-trending-up me-1"></i>Trending
-                                    </span>
-                                </div>
-                            </div>
-                        @endif
+                        </div>
                         
                         <div class="card-body p-3">
                             <h6 class="card-title fw-bold mb-2 small">{{ Str::limit($product->name, 40) }}</h6>

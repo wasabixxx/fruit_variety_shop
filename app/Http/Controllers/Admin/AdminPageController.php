@@ -47,6 +47,10 @@ class AdminPageController extends Controller
         }
 
         $pages = $query->orderBy('created_at', 'desc')->paginate(15);
+        
+        // Preserve query parameters in pagination links
+        $pages->appends(request()->query());
+        
         $totalPages = Page::count();
         $publishedPages = Page::where('is_published', true)->count();
         $draftPages = Page::where('is_published', false)->count();

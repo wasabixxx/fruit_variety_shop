@@ -110,6 +110,7 @@ Route::get('/order/payment-fallback', function() {
 Route::get('/order/momo-return', [OrderController::class, 'momoReturn'])->name('orders.momo-return');
 Route::post('/order/momo-notify', [OrderController::class, 'momoNotify'])->name('orders.momo-notify');
 Route::get('/order/success', [OrderController::class, 'success'])->name('orders.success');
+Route::get('/test-momo', [OrderController::class, 'testMomo'])->name('test.momo'); // Test route
 
 // Lịch sử đơn hàng của user (cần đăng nhập)
 Route::middleware('auth')->group(function() {

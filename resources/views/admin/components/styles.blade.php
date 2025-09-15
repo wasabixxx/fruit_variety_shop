@@ -409,4 +409,63 @@ body {
 .progress-bar {
     border-radius: 4px;
 }
+
+/* Pagination Styles */
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    border: 1px solid #D1D5DB;
+    color: var(--admin-secondary);
+    padding: 0.5rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    min-width: 38px;
+}
+
+.pagination .page-link:hover {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #9CA3AF;
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+    cursor: not-allowed;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    transform: none;
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+    color: #9CA3AF;
+}
+
+/* Responsive pagination */
+@media (max-width: 576px) {
+    .pagination .page-link {
+        padding: 0.4rem 0.6rem;
+        min-height: 32px;
+        min-width: 32px;
+        font-size: 0.875rem;
+    }
+}
 </style>

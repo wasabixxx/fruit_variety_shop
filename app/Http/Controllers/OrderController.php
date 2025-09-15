@@ -124,9 +124,9 @@ class OrderController extends Controller
         }
 
         // Tạo request MoMo theo đúng format API
-        $partnerCode = env('MOMO_PARTNER_CODE');
-        $accessKey = env('MOMO_ACCESS_KEY');
-        $secretKey = env('MOMO_SECRET_KEY');
+        $partnerCode = config('app.momo_partner_code');
+        $accessKey = config('app.momo_access_key');
+        $secretKey = config('app.momo_secret_key');
         $orderId = 'ORDER_' . time() . rand(1000, 9999);
         $requestId = 'REQUEST_' . time() . rand(1000, 9999);
         $amount = $orderInfo['total'];
@@ -165,17 +165,33 @@ class OrderController extends Controller
 
         try {
             // Gửi request đến MoMo API
-            $endpoint = env('MOMO_ENDPOINT');
+            $endpoint = config('app.momo_endpoint');
             $result = $this->execPostRequest($endpoint, json_encode($data));
             $jsonResult = json_decode($result, true);
+
+            // Kiểm tra response từ MoMo
+            if (!$jsonResult || !isset($jsonResult['payUrl'])) {
+                throw new \Exception('Phản hồi từ MoMo API không hợp lệ: ' . $result);
+            }
 
             // Lưu orderId vào session để xác thực sau
             session(['momo_order_id' => $orderId]);
 
             return view('orders.payment', compact('orderInfo', 'jsonResult', 'data', 'paymentMethod'));
         } catch (\Exception $e) {
+            // Log lỗi cụ thể
+            \Log::error('MoMo Payment Error', [
+                'error' => $e->getMessage(),
+                'order_info' => $orderInfo,
+                'payment_method' => $paymentMethod,
+                'endpoint' => config('app.momo_endpoint'),
+                'data' => $data
+            ]);
+
             // Nếu gặp lỗi API, chuyển về mock payment
             session(['momo_order_id' => $orderId]);
+            session()->flash('warning', 'Hệ thống thanh toán MoMo đang bảo trì. Vui lòng sử dụng phương thức thanh toán thử nghiệm.');
+            
             return view('orders.payment-mock', compact('orderInfo', 'paymentMethod'));
         }
     }
@@ -191,12 +207,36 @@ class OrderController extends Controller
                 'Content-Type: application/json',
                 'Content-Length: ' . strlen($data))
         );
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        
         //execute post
         $result = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        
+        // Log để debug
+        \Log::info('MoMo API Call', [
+            'url' => $url,
+            'data' => $data,
+            'http_code' => $httpCode,
+            'response' => $result,
+            'curl_error' => $error
+        ]);
+        
         //close connection
         curl_close($ch);
+        
+        if ($error) {
+            throw new \Exception("Lỗi kết nối MoMo API: " . $error);
+        }
+        
+        if ($httpCode !== 200) {
+            throw new \Exception("MoMo API trả về lỗi HTTP: " . $httpCode);
+        }
+        
         return $result;
     }
 
@@ -329,5 +369,82 @@ class OrderController extends Controller
 
         // Increment voucher used count
         $voucher->increment('used_count');
+    }
+    
+    // Test kết nối MoMo API
+    public function testMomo()
+    {
+        $endpoint = config('app.momo_endpoint', env('MOMO_ENDPOINT'));
+        $partnerCode = config('app.momo_partner_code', env('MOMO_PARTNER_CODE'));
+        $accessKey = config('app.momo_access_key', env('MOMO_ACCESS_KEY'));
+        $secretKey = config('app.momo_secret_key', env('MOMO_SECRET_KEY'));
+        
+        // Debug env variables
+        $envDebug = [
+            'endpoint' => $endpoint,
+            'partner_code' => $partnerCode,
+            'access_key' => $accessKey,
+            'secret_key_length' => $secretKey ? strlen($secretKey) : 0
+        ];
+        
+        if (!$endpoint || !$partnerCode || !$accessKey || !$secretKey) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Thiếu cấu hình MoMo environment variables',
+                'debug' => $envDebug
+            ]);
+        }
+        
+        // Test data đơn giản
+        $orderId = 'TEST_' . time();
+        $requestId = 'TEST_REQUEST_' . time();
+        $amount = 50000;
+        $orderInfo = 'Test MoMo connection';
+        $redirectUrl = route('orders.momo-return');
+        $ipnUrl = route('orders.momo-notify');
+        $extraData = '';
+        $requestType = 'payWithATM';
+
+        // Tạo signature
+        $rawHash = "accessKey=" . $accessKey . "&amount=" . $amount . "&extraData=" . $extraData . "&ipnUrl=" . $ipnUrl . "&orderId=" . $orderId . "&orderInfo=" . $orderInfo . "&partnerCode=" . $partnerCode . "&redirectUrl=" . $redirectUrl . "&requestId=" . $requestId . "&requestType=" . $requestType;
+        $signature = hash_hmac("sha256", $rawHash, $secretKey);
+
+        $data = [
+            'partnerCode' => $partnerCode,
+            'partnerName' => "Test",
+            'storeId' => "MomoTestStore",
+            'requestId' => $requestId,
+            'amount' => $amount,
+            'orderId' => $orderId,
+            'orderInfo' => $orderInfo,
+            'redirectUrl' => $redirectUrl,
+            'ipnUrl' => $ipnUrl,
+            'lang' => 'vi',
+            'extraData' => $extraData,
+            'requestType' => $requestType,
+            'signature' => $signature
+        ];
+
+        try {
+            $result = $this->execPostRequest($endpoint, json_encode($data));
+            $jsonResult = json_decode($result, true);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Kết nối MoMo API thành công',
+                'env_debug' => $envDebug,
+                'endpoint' => $endpoint,
+                'request_data' => $data,
+                'response' => $jsonResult
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lỗi kết nối MoMo API: ' . $e->getMessage(),
+                'env_debug' => $envDebug,
+                'endpoint' => $endpoint,
+                'request_data' => $data
+            ]);
+        }
     }
 }
