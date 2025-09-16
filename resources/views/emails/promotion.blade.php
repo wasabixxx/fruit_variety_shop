@@ -19,8 +19,8 @@ Giảm {{ number_format($voucher->amount, 0, ',', '.') }}đ
 **Đơn hàng tối thiểu:** {{ number_format($voucher->minimum_order_amount, 0, ',', '.') }}đ
 @endif
 
-**Có hiệu lực từ:** {{ $voucher->starts_at->format('d/m/Y H:i') }}  
-**Hết hạn:** {{ $voucher->expires_at->format('d/m/Y H:i') }}  
+**Có hiệu lực từ:** {{ $voucher->starts_at ? $voucher->starts_at->format('d/m/Y H:i') : 'Không giới hạn' }}  
+**Hết hạn:** {{ $voucher->expires_at ? $voucher->expires_at->format('d/m/Y H:i') : 'Không giới hạn' }}  
 **Số lượng:** {{ $voucher->usage_limit - $voucher->used_count }} lượt còn lại
 </x-mail::panel>
 

@@ -177,10 +177,10 @@ document.getElementById('voucher_id').addEventListener('change', function() {
         document.getElementById('info-discount').textContent = discount;
         
         document.getElementById('info-period').textContent = 
-            `${selectedOption.dataset.validFrom} - ${selectedOption.dataset.validUntil}`;
+            `${selectedOption.dataset.validFrom || 'N/A'} - ${selectedOption.dataset.validUntil || 'N/A'}`;
         
         let conditions = '';
-        if (selectedOption.dataset.min) {
+        if (selectedOption.dataset.min && selectedOption.dataset.min !== '0') {
             conditions += `<p class="mb-1"><strong>Đơn tối thiểu:</strong> ${new Intl.NumberFormat('vi-VN').format(selectedOption.dataset.min)}đ</p>`;
         }
         if (selectedOption.dataset.max) {
