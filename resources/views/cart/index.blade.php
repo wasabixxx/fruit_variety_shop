@@ -240,9 +240,15 @@
                         
                         <!-- Action Buttons -->
                         <div class="d-grid gap-2">
-                            <a href="{{ route('orders.create') }}" class="btn btn-primary btn-lg">
-                                <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
-                            </a>
+                            @auth
+                                <a href="{{ route('orders.create') }}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập để thanh toán
+                                </a>
+                            @endauth
                             <a href="{{ route('products.index') }}" class="btn btn-outline-primary">
                                 <i class="bi bi-arrow-left me-2"></i>Tiếp tục mua sắm
                             </a>

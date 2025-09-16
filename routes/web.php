@@ -106,25 +106,27 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 // ORDER ROUTES - Đơn hàng
 // ============================================================================
 
-// Tạo đơn hàng (không cần đăng nhập)
-Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
-Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
-
-// Thanh toán
-Route::get('/order/payment', [OrderController::class, 'payment'])->name('orders.payment');
-Route::get('/order/payment-fallback', function() {
-    $orderInfo = session('order_info');
-    return view('orders.payment-mock', compact('orderInfo'));
-})->name('orders.payment-fallback');
-
-// MoMo payment
+// Public order routes (không cần đăng nhập)
+// MoMo payment callbacks
 Route::get('/order/momo-return', [OrderController::class, 'momoReturn'])->name('orders.momo-return');
 Route::post('/order/momo-notify', [OrderController::class, 'momoNotify'])->name('orders.momo-notify');
 Route::get('/order/success', [OrderController::class, 'success'])->name('orders.success');
 Route::get('/test-momo', [OrderController::class, 'testMomo'])->name('test.momo'); // Test route
 
-// Lịch sử đơn hàng của user (cần đăng nhập)
+// Protected order routes (cần đăng nhập)
 Route::middleware('auth')->group(function() {
+    // Tạo và xử lý đơn hàng
+    Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
+
+    // Thanh toán
+    Route::get('/order/payment', [OrderController::class, 'payment'])->name('orders.payment');
+    Route::get('/order/payment-fallback', function() {
+        $orderInfo = session('order_info');
+        return view('orders.payment-mock', compact('orderInfo'));
+    })->name('orders.payment-fallback');
+    
+    // Lịch sử đơn hàng của user
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my-orders');
     Route::get('/my-orders/{order}', [OrderController::class, 'myOrderDetail'])->name('orders.my-order-detail');
 });
