@@ -8,20 +8,24 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Order;
+use App\Models\Voucher;
 
-class OrderConfirmationMail extends Mailable
+class PromotionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $order;
+    public $voucher;
+    public $subject;
+    public $content;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Order $order)
+    public function __construct(Voucher $voucher, $subject, $content)
     {
-        $this->order = $order;
+        $this->voucher = $voucher;
+        $this->subject = $subject;
+        $this->content = $content;
     }
 
     /**
@@ -30,7 +34,7 @@ class OrderConfirmationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Xác nhận đơn hàng #' . $this->order->id . ' - ' . config('app.name'),
+            subject: $this->subject . ' - ' . config('app.name'),
         );
     }
 
@@ -40,10 +44,10 @@ class OrderConfirmationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.order-confirmation',
+            markdown: 'emails.promotion',
             with: [
-                'order' => $this->order,
-                'orderItems' => $this->order->orderItems()->with('product')->get()
+                'voucher' => $this->voucher,
+                'content' => $this->content
             ]
         );
     }

@@ -72,6 +72,14 @@
             </li>
             
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.email-marketing.*') ? 'active' : '' }}" 
+                   href="{{ route('admin.email-marketing.index') }}">
+                    <i class="bi bi-envelope-at"></i>
+                    <span>Email Marketing</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
                    href="{{ route('admin.reports.index') }}">
                     <i class="bi bi-graph-up"></i>

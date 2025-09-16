@@ -9,7 +9,7 @@
 # Marketing & Khuyến mãi:
 - Mã giảm giá/Voucher: Tạo và quản lý các chương trình khuyến mãi. **OK**
 - Chương trình khách hàng thân thiết: Tích điểm, xếp hạng thành viên. 
-- Email Marketing/Thông báo: Gửi email xác nhận đơn hàng, khuyến mãi, cập nhật. **OK** 
+- Email Marketing/Thông báo: Gửi email xác nhận đơn hàng, khuyến mãi, cập nhật. **OK** **OK** 
 
 # Hỗ trợ Khách hàng:
 - FAQ (Câu hỏi thường gặp): Cung cấp thông tin giải đáp thắc mắc.

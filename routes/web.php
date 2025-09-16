@@ -87,6 +87,11 @@ Route::get('/email/verify/{token}', [AuthController::class, 'verifyEmail'])->nam
 Route::get('/email/verify', [AuthController::class, 'showVerificationNotice'])->name('email.verification.notice')->middleware('auth');
 Route::post('/email/resend', [AuthController::class, 'resendVerification'])->name('email.resend')->middleware('auth');
 
+// Newsletter Routes
+Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+Route::get('/newsletter/resubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'resubscribe'])->name('newsletter.resubscribe');
+
 // ============================================================================
 // CART ROUTES - Giỏ hàng
 // ============================================================================
@@ -341,6 +346,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', function() {
             return view('admin.reports.index');
         })->name('index');
+    });
+    
+    // ========================================================================
+    // EMAIL MARKETING
+    // ========================================================================
+    Route::prefix('email-marketing')->name('email-marketing.')->group(function() {
+        Route::get('/', [App\Http\Controllers\Admin\EmailMarketingController::class, 'index'])->name('index');
+        Route::get('/create-promotion', [App\Http\Controllers\Admin\EmailMarketingController::class, 'createPromotion'])->name('create-promotion');
+        Route::post('/send-promotion', [App\Http\Controllers\Admin\EmailMarketingController::class, 'sendPromotion'])->name('send-promotion');
+        Route::get('/subscribers', [App\Http\Controllers\Admin\EmailMarketingController::class, 'subscribers'])->name('subscribers');
     });
     
 });

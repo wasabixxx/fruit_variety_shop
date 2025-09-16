@@ -609,6 +609,12 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Newsletter Subscription -->
+            <div class="mt-5">
+                @include('components.newsletter-form')
+            </div>
+            
             <hr class="my-4 border-secondary">
             <div class="row align-items-center">
                 <div class="col-md-6">

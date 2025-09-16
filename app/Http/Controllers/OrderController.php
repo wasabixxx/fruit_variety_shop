@@ -8,6 +8,8 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Voucher;
 use App\Models\VoucherUsage;
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -101,6 +103,14 @@ class OrderController extends Controller
             // Record voucher usage if applied
             if ($appliedVoucher && $discountAmount > 0) {
                 $this->recordVoucherUsage($appliedVoucher['id'], $order, $discountAmount);
+            }
+
+            // Send order confirmation email
+            try {
+                Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
+            } catch (\Exception $e) {
+                // Log email error but don't interrupt order process
+                \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
             }
 
             // Clear session
@@ -275,6 +285,14 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => $item['price']
                 ]);
+            }
+
+            // Send order confirmation email
+            try {
+                Mail::to($order->user->email)->send(new OrderConfirmationMail($order));
+            } catch (\Exception $e) {
+                // Log email error but don't interrupt order process
+                \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
             }
 
             session()->forget(['cart', 'order_info', 'momo_order_id']);
