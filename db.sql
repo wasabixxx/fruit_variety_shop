@@ -14,13 +14,31 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Dumping data for table fruit_variety_shop.categories: ~4 rows (approximately)
+-- Dumping structure for table fruit_variety_shop.categories
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table fruit_variety_shop.categories: ~5 rows (approximately)
 REPLACE INTO `categories` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
 	(1, 'Hạt cây ăn quả nhiệt đới', 'Xoài, chuối, v.v.', '2025-08-17 19:18:23', '2025-09-14 19:41:57'),
 	(2, 'Hạt cây ăn quả ôn đới', 'Táo, lê, v.v.', '2025-08-17 19:18:23', '2025-09-14 19:42:08'),
 	(3, 'Hạt nhân', 'Trái cây tươi ngon', '2025-09-09 00:01:01', '2025-09-14 19:42:21'),
 	(4, 'Hạt nhân 1', 'Trái cây sấy khô', '2025-09-09 00:01:01', '2025-09-14 19:42:34'),
 	(5, 'Hạt nhân 2', 'Trái cây từ nước ngoài', '2025-09-09 00:01:01', '2025-09-14 19:42:44');
+
+-- Dumping structure for table fruit_variety_shop.migrations
+CREATE TABLE IF NOT EXISTS `migrations` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table fruit_variety_shop.migrations: ~19 rows (approximately)
 REPLACE INTO `migrations` (`id`, `migration`, `batch`) VALUES
@@ -44,9 +62,51 @@ REPLACE INTO `migrations` (`id`, `migration`, `batch`) VALUES
 	(23, '2025_09_15_034508_create_password_resets_table', 11),
 	(24, '2025_09_15_040150_create_newsletter_subscribers_table', 11);
 
+-- Dumping structure for table fruit_variety_shop.newsletter_subscribers
+CREATE TABLE IF NOT EXISTS `newsletter_subscribers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `unsubscribe_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subscribed_at` timestamp NOT NULL,
+  `unsubscribed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `newsletter_subscribers_email_unique` (`email`),
+  KEY `newsletter_subscribers_email_is_active_index` (`email`,`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.newsletter_subscribers: ~0 rows (approximately)
 
--- Dumping data for table fruit_variety_shop.orders: ~95 rows (approximately)
+-- Dumping structure for table fruit_variety_shop.orders
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `customer_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_address` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_amount` decimal(15,2) NOT NULL,
+  `voucher_id` bigint unsigned DEFAULT NULL,
+  `voucher_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `subtotal` decimal(10,2) DEFAULT NULL,
+  `payment_method` enum('cod','momo_atm','momo_card','momo_wallet') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_status` enum('pending','paid','failed','refunded') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `order_status` enum('pending','confirmed','processing','shipped','delivered','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `momo_transaction_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `note` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `orders_user_id_foreign` (`user_id`),
+  KEY `orders_voucher_id_index` (`voucher_id`),
+  CONSTRAINT `orders_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `orders_voucher_id_foreign` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table fruit_variety_shop.orders: ~96 rows (approximately)
 REPLACE INTO `orders` (`id`, `user_id`, `customer_name`, `customer_phone`, `customer_address`, `total_amount`, `voucher_id`, `voucher_code`, `discount_amount`, `subtotal`, `payment_method`, `payment_status`, `order_status`, `momo_transaction_id`, `note`, `created_at`, `updated_at`) VALUES
 	(1, 2, 'gffghfgh', '0987654321', 'fbdfdf', 50000.00, NULL, NULL, 0.00, NULL, 'momo_card', 'paid', 'delivered', '4572647397', NULL, '2025-09-07 20:55:47', '2025-09-08 11:36:13'),
 	(3, NULL, 'Test Customer', '0123456789', '123 Test Street, Test City', 50000.00, NULL, NULL, 0.00, NULL, 'cod', 'paid', 'delivered', NULL, NULL, '2025-09-08 11:01:06', '2025-09-08 11:36:29'),
@@ -145,7 +205,23 @@ REPLACE INTO `orders` (`id`, `user_id`, `customer_name`, `customer_phone`, `cust
 	(97, 2, 'sdvsdf', '0987654321', 'sdfsdf', 105000.00, NULL, NULL, 0.00, NULL, 'momo_card', 'paid', 'confirmed', '4575422053', NULL, '2025-09-14 19:27:11', '2025-09-14 19:27:11'),
 	(98, 1, 'àdssdf', '1231231231', 'fdgdfgdfg', 550000.00, NULL, NULL, 0.00, NULL, 'momo_card', 'paid', 'confirmed', '4575422063', NULL, '2025-09-14 19:30:42', '2025-09-14 19:30:42');
 
--- Dumping data for table fruit_variety_shop.order_items: ~232 rows (approximately)
+-- Dumping structure for table fruit_variety_shop.order_items
+CREATE TABLE IF NOT EXISTS `order_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `quantity` int NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_items_order_id_foreign` (`order_id`),
+  KEY `order_items_product_id_foreign` (`product_id`),
+  CONSTRAINT `order_items_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `order_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=238 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table fruit_variety_shop.order_items: ~235 rows (approximately)
 REPLACE INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, `created_at`, `updated_at`) VALUES
 	(1, 1, 1, 1, 50000.00, '2025-09-07 20:55:47', '2025-09-07 20:55:47'),
 	(3, 5, 3, 3, 45000.00, '2025-08-10 00:02:16', '2025-08-10 00:02:16'),
@@ -383,6 +459,37 @@ REPLACE INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`,
 	(236, 97, 3, 1, 45000.00, '2025-09-14 19:27:11', '2025-09-14 19:27:11'),
 	(237, 98, 2, 10, 60000.00, '2025-09-14 19:30:42', '2025-09-14 19:30:42');
 
+-- Dumping structure for table fruit_variety_shop.pages
+CREATE TABLE IF NOT EXISTS `pages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `excerpt` text COLLATE utf8mb4_unicode_ci,
+  `meta_title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `meta_description` text COLLATE utf8mb4_unicode_ci,
+  `meta_keywords` text COLLATE utf8mb4_unicode_ci,
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `show_in_menu` tinyint(1) NOT NULL DEFAULT '0',
+  `menu_order` int NOT NULL DEFAULT '0',
+  `template` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'default',
+  `featured_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
+  `published_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pages_slug_unique` (`slug`),
+  KEY `pages_created_by_foreign` (`created_by`),
+  KEY `pages_updated_by_foreign` (`updated_by`),
+  KEY `pages_slug_is_published_index` (`slug`,`is_published`),
+  KEY `pages_is_published_published_at_index` (`is_published`,`published_at`),
+  KEY `pages_show_in_menu_menu_order_index` (`show_in_menu`,`menu_order`),
+  CONSTRAINT `pages_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `pages_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.pages: ~8 rows (approximately)
 REPLACE INTO `pages` (`id`, `title`, `slug`, `content`, `excerpt`, `meta_title`, `meta_description`, `meta_keywords`, `is_published`, `show_in_menu`, `menu_order`, `template`, `featured_image`, `created_by`, `updated_by`, `published_at`, `created_at`, `updated_at`) VALUES
 	(1, 'Về chúng tôi', 've-chung-toi', '<h2>Câu chuyện của chúng tôi</h2>\n                <p>Được thành lập từ năm 2018, <strong>Fruit Variety Shop</strong> đã trở thành một trong những cửa hàng trái cây uy tín hàng đầu tại Việt Nam. Chúng tôi bắt đầu từ một cửa hàng nhỏ với ước mơ mang đến cho khách hàng những trái cây tươi ngon, chất lượng cao với giá cả hợp lý.</p>\n\n                <h3>Sứ mệnh của chúng tôi</h3>\n                <p>Chúng tôi cam kết:</p>\n                <ul>\n                    <li>Cung cấp trái cây tươi ngon, an toàn cho sức khỏe</li>\n                    <li>Đảm bảo chất lượng từ nguồn gốc đến tay khách hàng</li>\n                    <li>Phục vụ khách hàng với sự tận tâm và chuyên nghiệp</li>\n                    <li>Góp phần xây dựng lối sống khỏe mạnh cho cộng đồng</li>\n                </ul>\n\n                <h3>Tầm nhìn</h3>\n                <p>Trở thành chuỗi cửa hàng trái cây hàng đầu Việt Nam, được khách hàng tin tưởng và lựa chọn.</p>\n\n                <h3>Đội ngũ của chúng tôi</h3>\n                <p>Với đội ngũ nhân viên giàu kinh nghiệm và đam mê, chúng tôi luôn sẵn sàng tư vấn và hỗ trợ khách hàng chọn được những sản phẩm phù hợp nhất.</p>', 'Tìm hiểu về câu chuyện và sứ mệnh của Fruit Variety Shop - nơi cung cấp trái cây tươi ngon, chất lượng cao.', 'Về chúng tôi - Fruit Variety Shop', 'Tìm hiểu về Fruit Variety Shop - cửa hàng trái cây uy tín với sứ mệnh mang đến sản phẩm tươi ngon, chất lượng cao cho khách hàng.', 'về chúng tôi, fruit variety shop, cửa hàng trái cây, trái cây tươi', 1, 1, 1, 'about', 'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80', 1, 1, '2025-09-14 14:19:57', '2025-09-14 14:19:57', '2025-09-14 14:19:57'),
@@ -394,11 +501,60 @@ REPLACE INTO `pages` (`id`, `title`, `slug`, `content`, `excerpt`, `meta_title`,
 	(9, '123132', '11gg', '<p><br></p>', '123132', '123132', '123132', '123132', 1, 0, 0, 'default', NULL, 1, 1, '2025-09-14 20:09:01', '2025-09-14 20:08:52', '2025-09-14 20:09:01'),
 	(10, '345345', '3435', '<p>&lt;p&gt;&amp;lt;p&amp;gt;&amp;lt;br&amp;gt;&amp;lt;/p&amp;gt;&lt;/p&gt;</p>', '345345', '345354', '435354', '345453', 1, 1, 0, 'contact', NULL, 1, 1, '2025-09-14 20:10:18', '2025-09-14 20:10:13', '2025-09-14 20:21:43');
 
+-- Dumping structure for table fruit_variety_shop.password_resets
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.password_resets: ~0 rows (approximately)
+
+-- Dumping structure for table fruit_variety_shop.password_reset_tokens
+CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table fruit_variety_shop.password_reset_tokens: ~0 rows (approximately)
 
+-- Dumping structure for table fruit_variety_shop.personal_access_tokens
+CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.personal_access_tokens: ~0 rows (approximately)
+
+-- Dumping structure for table fruit_variety_shop.products
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category_id` bigint unsigned NOT NULL,
+  `price` decimal(8,2) NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `products_category_id_foreign` (`category_id`),
+  CONSTRAINT `products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table fruit_variety_shop.products: ~9 rows (approximately)
 REPLACE INTO `products` (`id`, `name`, `category_id`, `price`, `description`, `image`, `stock`, `created_at`, `updated_at`) VALUES
@@ -412,11 +568,49 @@ REPLACE INTO `products` (`id`, `name`, `category_id`, `price`, `description`, `i
 	(8, 'Hạt giống Dưa Hấu', 1, 30000.00, 'Mô tả cho Dưa Hấu', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQb8jAqdnTTuUukvmuv9x3Agkk09asA1BgsCw&s', 20, '2025-09-09 00:01:01', '2025-09-14 18:56:12'),
 	(9, 'Giống cây Dứa', 1, 40000.00, 'Mô tả cho Dứa', 'https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRUEIjO2w77raxH2jr_pRIx2D-iHxAW-qDC4MNFLnqbbL45v8ZMbzfwRPtAcv1d3DO8eH6nDE_U-jXycond9yQeg1ez4ALipfocp9gaQg', 50, '2025-09-09 00:01:01', '2025-09-14 18:56:37');
 
--- Dumping data for table fruit_variety_shop.reviews: ~0 rows (approximately)
+-- Dumping structure for table fruit_variety_shop.reviews
+CREATE TABLE IF NOT EXISTS `reviews` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned NOT NULL,
+  `rating` int NOT NULL DEFAULT '5',
+  `comment` text COLLATE utf8mb4_unicode_ci,
+  `is_verified` tinyint(1) NOT NULL DEFAULT '0',
+  `is_approved` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reviews_user_id_product_id_order_id_unique` (`user_id`,`product_id`,`order_id`),
+  KEY `reviews_order_id_foreign` (`order_id`),
+  KEY `reviews_product_id_is_approved_index` (`product_id`,`is_approved`),
+  KEY `reviews_user_id_index` (`user_id`),
+  CONSTRAINT `reviews_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table fruit_variety_shop.reviews: ~1 rows (approximately)
 REPLACE INTO `reviews` (`id`, `user_id`, `product_id`, `order_id`, `rating`, `comment`, `is_verified`, `is_approved`, `created_at`, `updated_at`) VALUES
 	(6, 2, 1, 1, 5, 'Rất oke mình mua trồng ko lên mầm', 1, 1, '2025-09-14 19:16:40', '2025-09-14 19:16:40');
 
--- Dumping data for table fruit_variety_shop.users: ~5 rows (approximately)
+-- Dumping structure for table fruit_variety_shop.users
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `role` enum('admin','user') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `email_verification_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for table fruit_variety_shop.users: ~6 rows (approximately)
 REPLACE INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `role`, `email_verification_token`) VALUES
 	(1, 'Admin', 'admin@admin.com', '2025-08-18 23:34:40', '$2y$12$lf9.L3wIa8WPR1ncaUJSjOysYt0YGGyx76rHUvcRLklMPPhwh.nFm', NULL, '2025-08-17 19:18:23', '2025-08-18 23:34:40', 'admin', NULL),
 	(2, 'Nguyễn Ngọc Khánh', 'wasabi954@gmail.com', '2025-08-18 23:34:01', '$2y$12$6mBk3GoICdKIVEo6u33gy.CMl..glqK8ecvBBZyoRDOAfy.L8ogBu', 'FGwBGO0chvvqvM9QWhPIDru3mn3b73iy106it7WaaEJt0hFqEq8Ih4eRofaC', '2025-08-18 23:25:36', '2025-09-21 19:03:39', 'user', NULL),
@@ -424,6 +618,36 @@ REPLACE INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `r
 	(4, 'Demo User', 'demo@example.com', NULL, '$2y$12$4Erq9UkDRiKu7o2bqpjMpeKXZRMmfjo15mM5MHqnXh2ibSc7ASIQe', NULL, '2025-09-09 00:00:00', '2025-09-09 00:00:00', 'user', NULL),
 	(5, 'Admin', 'admin@test.com', '2025-09-14 18:31:06', '$2y$12$VPmwhMXBAZESluC5NHityeZj8/4mfLFO2poqRgLA78EuNlHPEuDVi', NULL, '2025-09-14 18:31:06', '2025-09-14 18:31:06', 'admin', NULL),
 	(6, 'Mosaic NGUyen', 'mosaic.hmc@gmail.com', NULL, '$2y$12$fOosj0ZNEmLBwHp8xj1UHuWAb8ZByixlZ.66eaUhbSDl0FKUIIOBa', NULL, '2025-09-21 19:08:51', '2025-09-21 19:08:52', 'user', 'e58c19c5838f2d25ad2ac360b9fd6423d140a6790d73a694aa592bf5bc165374');
+
+-- Dumping structure for table fruit_variety_shop.vouchers
+CREATE TABLE IF NOT EXISTS `vouchers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `type` enum('percentage','fixed') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `usage_limit` int DEFAULT NULL,
+  `usage_limit_per_user` int NOT NULL DEFAULT '1',
+  `used_count` int NOT NULL DEFAULT '0',
+  `minimum_order_amount` decimal(10,2) DEFAULT NULL,
+  `starts_at` datetime DEFAULT NULL,
+  `expires_at` datetime DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `is_public` tinyint(1) NOT NULL DEFAULT '1',
+  `applicable_categories` json DEFAULT NULL,
+  `applicable_users` json DEFAULT NULL,
+  `created_by` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `vouchers_code_unique` (`code`),
+  KEY `vouchers_created_by_foreign` (`created_by`),
+  KEY `vouchers_code_is_active_index` (`code`,`is_active`),
+  KEY `vouchers_expires_at_is_active_index` (`expires_at`,`is_active`),
+  KEY `vouchers_starts_at_index` (`starts_at`),
+  CONSTRAINT `vouchers_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table fruit_variety_shop.vouchers: ~10 rows (approximately)
 REPLACE INTO `vouchers` (`id`, `code`, `name`, `description`, `type`, `amount`, `usage_limit`, `usage_limit_per_user`, `used_count`, `minimum_order_amount`, `starts_at`, `expires_at`, `is_active`, `is_public`, `applicable_categories`, `applicable_users`, `created_by`, `created_at`, `updated_at`) VALUES
@@ -438,9 +662,60 @@ REPLACE INTO `vouchers` (`id`, `code`, `name`, `description`, `type`, `amount`, 
 	(9, 'LASTCHANCE', 'Cơ hội cuối', 'Giảm 30% - Chỉ còn 3 ngày!', 'percentage', 30.00, 30, 1, 0, 250000.00, NULL, '2025-09-17 20:48:22', 1, 1, NULL, NULL, 1, '2025-09-14 13:48:22', '2025-09-14 13:48:22'),
 	(10, 'EXPIRED20', 'Voucher đã hết hạn', 'Voucher này đã hết hạn sử dụngg', 'percentage', 20.00, 100, 1, 0, 100000.00, NULL, '2025-09-09 20:48:00', 0, 1, NULL, NULL, 1, '2025-09-14 13:48:22', '2025-09-14 20:16:15');
 
+-- Dumping structure for table fruit_variety_shop.voucher_categories
+CREATE TABLE IF NOT EXISTS `voucher_categories` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `voucher_id` bigint unsigned NOT NULL,
+  `category_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `voucher_categories_voucher_id_category_id_unique` (`voucher_id`,`category_id`),
+  KEY `voucher_categories_category_id_foreign` (`category_id`),
+  CONSTRAINT `voucher_categories_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `voucher_categories_voucher_id_foreign` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.voucher_categories: ~0 rows (approximately)
 
+-- Dumping structure for table fruit_variety_shop.voucher_usages
+CREATE TABLE IF NOT EXISTS `voucher_usages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `voucher_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `order_id` bigint unsigned NOT NULL,
+  `order_amount` decimal(10,2) NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL,
+  `voucher_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `used_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `voucher_usages_voucher_id_order_id_unique` (`voucher_id`,`order_id`),
+  KEY `voucher_usages_user_id_foreign` (`user_id`),
+  KEY `voucher_usages_order_id_foreign` (`order_id`),
+  KEY `voucher_usages_voucher_id_user_id_index` (`voucher_id`,`user_id`),
+  KEY `voucher_usages_used_at_index` (`used_at`),
+  CONSTRAINT `voucher_usages_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `voucher_usages_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `voucher_usages_voucher_id_foreign` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Dumping data for table fruit_variety_shop.voucher_usages: ~0 rows (approximately)
+
+-- Dumping structure for table fruit_variety_shop.wishlists
+CREATE TABLE IF NOT EXISTS `wishlists` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `product_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `wishlists_user_id_product_id_unique` (`user_id`,`product_id`),
+  KEY `wishlists_product_id_foreign` (`product_id`),
+  CONSTRAINT `wishlists_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `wishlists_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table fruit_variety_shop.wishlists: ~0 rows (approximately)
 
