@@ -13,7 +13,7 @@ class EnsureEmailIsVerified
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Calosure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check()) {
             $user = auth()->user();

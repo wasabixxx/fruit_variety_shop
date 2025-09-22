@@ -42,6 +42,7 @@
                         <th>Tên</th>
                         <th>Email</th>
                         <th>Vai trò</th>
+                        <th>Trạng thái Email</th>
                         <th>Số đơn hàng</th>
                         <th>Ngày đăng ký</th>
                         <th>Thao tác</th>
@@ -78,6 +79,19 @@
                             @endif
                         </td>
                         <td>
+                            @if($user->hasVerifiedEmail())
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle me-1"></i>Đã xác thực
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ $user->email_verified_at->format('d/m/Y H:i') }}</small>
+                            @else
+                                <span class="badge badge-warning">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Chưa xác thực
+                                </span>
+                            @endif
+                        </td>
+                        <td>
                             @if($user->orders_count > 0)
                                 <span class="badge badge-success">{{ $user->orders_count }} đơn</span>
                             @else
@@ -101,7 +115,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="9" class="text-center py-5">
                             <div class="empty-state">
                                 <i class="bi bi-people"></i>
                                 <h5>Chưa có user nào</h5>
@@ -145,7 +159,29 @@
         </div>
     </div>
     <div class="col-md-3">
+        <div class="card stats-card info">
+            <div class="card-body text-center">
+                <i class="bi bi-envelope-check fs-1 mb-2"></i>
+                <h4>{{ $verifiedUsers }}</h4>
+                <p class="mb-0 opacity-75">Đã xác thực email</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
         <div class="card stats-card warning">
+            <div class="card-body text-center">
+                <i class="bi bi-envelope-exclamation fs-1 mb-2"></i>
+                <h4>{{ $unverifiedUsers }}</h4>
+                <p class="mb-0 opacity-75">Chưa xác thực email</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Stats Row -->
+<div class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="card stats-card danger">
             <div class="card-body text-center">
                 <i class="bi bi-shield-check fs-1 mb-2"></i>
                 <h4>{{ $users->where('role', 'admin')->count() }}</h4>
@@ -153,12 +189,21 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stats-card info">
+    <div class="col-md-4">
+        <div class="card stats-card primary">
             <div class="card-body text-center">
                 <i class="bi bi-cart-check fs-1 mb-2"></i>
                 <h4>{{ $users->sum('orders_count') }}</h4>
                 <p class="mb-0 opacity-75">Tổng đơn hàng</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card secondary">
+            <div class="card-body text-center">
+                <i class="bi bi-calendar-event fs-1 mb-2"></i>
+                <h4>{{ $users->where('created_at', '>=', now()->subDays(30))->count() }}</h4>
+                <p class="mb-0 opacity-75">Đăng ký tháng này</p>
             </div>
         </div>
     </div>

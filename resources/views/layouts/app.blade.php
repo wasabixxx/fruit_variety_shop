@@ -537,6 +537,23 @@
                 </div>
             @endif
             
+            <!-- Email Verification Notice -->
+            @auth
+                @if(!auth()->user()->hasVerifiedEmail())
+                    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-envelope-exclamation fs-5 me-3"></i>
+                            <div class="flex-grow-1">
+                                <strong>Cần xác thực email!</strong> 
+                                Bạn cần xác thực email để có thể đặt hàng. 
+                                <a href="{{ route('email.verification.notice') }}" class="alert-link">Xác thực ngay</a>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+            @endauth
+            
             @yield('content')
         </div>
     </div>

@@ -241,9 +241,20 @@
                         <!-- Action Buttons -->
                         <div class="d-grid gap-2">
                             @auth
-                                <a href="{{ route('orders.create') }}" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
-                                </a>
+                                @if(auth()->user()->hasVerifiedEmail())
+                                    <a href="{{ route('orders.create') }}" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
+                                    </a>
+                                @else
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>Cần xác thực email!</strong><br>
+                                        Bạn cần xác thực email trước khi đặt hàng.
+                                    </div>
+                                    <a href="{{ route('email.verification.notice') }}" class="btn btn-warning btn-lg">
+                                        <i class="bi bi-envelope-check me-2"></i>Xác thực email
+                                    </a>
+                                @endif
                             @else
                                 <a href="{{ route('login') }}" class="btn btn-primary btn-lg">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập để thanh toán

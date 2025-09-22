@@ -42,7 +42,6 @@
                     <tr>
                         <th>ID</th>
                         <th>Tên danh mục</th>
-                        <th>Slug</th>
                         <th>Mô tả</th>
                         <th>Số sản phẩm</th>
                         <th>Ngày tạo</th>
@@ -57,9 +56,6 @@
                         </td>
                         <td>
                             <div class="fw-semibold">{{ $category->name }}</div>
-                        </td>
-                        <td>
-                            <code class="bg-light px-2 py-1 rounded">{{ $category->slug }}</code>
                         </td>
                         <td>
                             <span class="text-muted">{{ Str::limit($category->description, 50) }}</span>

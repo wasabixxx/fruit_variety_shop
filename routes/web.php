@@ -113,8 +113,8 @@ Route::post('/order/momo-notify', [OrderController::class, 'momoNotify'])->name(
 Route::get('/order/success', [OrderController::class, 'success'])->name('orders.success');
 Route::get('/test-momo', [OrderController::class, 'testMomo'])->name('test.momo'); // Test route
 
-// Protected order routes (cần đăng nhập)
-Route::middleware('auth')->group(function() {
+// Protected order routes (cần đăng nhập và xác thức email)
+Route::middleware(['auth', 'email.verified'])->group(function() {
     // Tạo và xử lý đơn hàng
     Route::get('/order', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/order', [OrderController::class, 'store'])->name('orders.store');
@@ -125,7 +125,10 @@ Route::middleware('auth')->group(function() {
         $orderInfo = session('order_info');
         return view('orders.payment-mock', compact('orderInfo'));
     })->name('orders.payment-fallback');
-    
+});
+
+// Order history routes (cần đăng nhập)
+Route::middleware('auth')->group(function() {
     // Lịch sử đơn hàng của user
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.my-orders');
     Route::get('/my-orders/{order}', [OrderController::class, 'myOrderDetail'])->name('orders.my-order-detail');

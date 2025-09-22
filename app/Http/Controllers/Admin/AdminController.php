@@ -132,7 +132,12 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::withCount('orders')->orderBy('created_at', 'desc')->paginate(20);
-        return view('admin.users.index', compact('users'));
+        
+        // Thống kê email verification
+        $verifiedUsers = User::whereNotNull('email_verified_at')->count();
+        $unverifiedUsers = User::whereNull('email_verified_at')->count();
+        
+        return view('admin.users.index', compact('users', 'verifiedUsers', 'unverifiedUsers'));
     }
 
     public function userDetail(User $user)
