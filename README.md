@@ -21,12 +21,12 @@
 - **Email verification required** cho checkout process
 
 #### 🛍️ **Shopping Experience**
-- **3 danh mục trái cây** với hình ảnh chất lượng cao
-- **20+ sản phẩm** với thông tin chi tiết và link ảnh thực
+- **3 danh mục hạt giống** với hình ảnh chất lượng cao
+- **20+ loại hạt giống cây ăn quả** với thông tin chi tiết và hướng dẫn trồng
 - Shopping cart session-based
 - Wishlist (danh sách yêu thích)
 - Product search & advanced filtering
-- Product reviews và rating system
+- Product reviews và rating system cho chất lượng hạt giống
 
 #### 💳 **Payment & Orders**
 - **MoMo Payment Gateway** integration
@@ -151,16 +151,16 @@ php artisan serve
 ## 📊 Dữ liệu mẫu
 
 ### Danh mục sản phẩm (3)
-1. **Trái cây tươi** - Các loại trái cây tươi ngon chất lượng cao
-2. **Trái cây nhiệt đới** - Trái cây nhiệt đới đặc sản
-3. **Trái cây nhập khẩu** - Trái cây cao cấp nhập khẩu
+1. **Hạt giống cây ăn quả nhiệt đới** - Hạt giống các loại cây ăn quả nhiệt đới
+2. **Hạt giống cây ăn quả ôn đới** - Hạt giống cây ăn quả vùng ôn đới
+3. **Hạt giống cây ăn quả nhập khẩu** - Hạt giống cao cấp từ các nước có nền nông nghiệp phát triển
 
 ### Sản phẩm (20)
-- **Trái cây tươi:** Táo Fuji, Cam sành, Nho xanh, Dâu tây Đà Lạt...
-- **Trái cây nhiệt đới:** Sầu riêng Monthong, Măng cụt, Xoài cát Hòa Lộc...
-- **Trái cây nhập khẩu:** Cherry Mỹ, Blueberry Canada, Kiwi New Zealand...
+- **Hạt giống nhiệt đới:** Hạt xoài, hạt sầu riêng, hạt măng cụt, hạt chôm chôm, hạt vải...
+- **Hạt giống ôn đới:** Hạt táo, hạt lê, hạt nho, hạt đào, hạt mận...
+- **Hạt giống nhập khẩu:** Hạt cherry, hạt blueberry, hạt kiwi, hạt bơ, hạt lựu...
 
-*Tất cả sản phẩm đều có hình ảnh thực từ Unsplash và thông tin chi tiết.*
+*Tất cả sản phẩm đều có hình ảnh thực, thông tin chi tiết và hướng dẫn gieo trồng.*
 
 ## 🛠️ Công nghệ sử dụng
 
@@ -217,17 +217,17 @@ fruit_variety_shop/
 
 ### User Journey
 1. **Đăng ký** → Email verification **bắt buộc**
-2. **Browse products** → Add to cart/wishlist
+2. **Browse seeds** → Add to cart/wishlist
 3. **Checkout** → **Email verified required**
 4. **Payment** (MoMo/Mock) → Order confirmation
-5. **Order tracking** → Review products
+5. **Order tracking** → Review seed quality & growing results
 
 ### Admin Workflow
 1. **Dashboard** → Overview & statistics
-2. **Product management** → CRUD operations
+2. **Seed management** → CRUD operations với thông tin gieo trồng
 3. **Order management** → Status updates
 4. **User management** → Verification status
-5. **Marketing** → Email campaigns & vouchers
+5. **Marketing** → Email campaigns & vouchers cho nông dân
 
 ## 🔧 Commands hữu ích
 
@@ -293,5 +293,5 @@ Dự án này được phát hành dưới [MIT License](https://opensource.org/
 ---
 
 <p align="center">
-  <strong>🍎 Fruit Variety Shop - Fresh Fruits, Fresh Experience! 🍊</strong>
+  <strong>� Fruit Variety Shop - Quality Seeds, Fruitful Future! �</strong>
 </p>
