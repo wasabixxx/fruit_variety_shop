@@ -74,10 +74,42 @@
                                 {{ $order->payment_method }}
                             @endif
                         </div>
+                        <div class="mt-1">
+                            @php
+                                $paymentStatusConfig = [
+                                    'pending' => ['class' => 'warning', 'icon' => 'hourglass-split', 'text' => 'Chờ thanh toán'],
+                                    'paid' => ['class' => 'success', 'icon' => 'check-circle', 'text' => 'Đã thanh toán'],
+                                    'failed' => ['class' => 'danger', 'icon' => 'exclamation-circle', 'text' => 'Thanh toán thất bại'],
+                                    'refunded' => ['class' => 'info', 'icon' => 'arrow-return-left', 'text' => 'Đã hoàn tiền']
+                                ];
+                                $paymentConfig = $paymentStatusConfig[$order->payment_status] ?? $paymentStatusConfig['pending'];
+                            @endphp
+                            <span class="badge bg-{{ $paymentConfig['class'] }} bg-opacity-10 text-{{ $paymentConfig['class'] }}">
+                                <i class="bi bi-{{ $paymentConfig['icon'] }} me-1"></i>{{ $paymentConfig['text'] }}
+                            </span>
+                            @if($order->momo_transaction_id)
+                                <div class="mt-1">
+                                    <small class="text-muted">Mã giao dịch: {{ $order->momo_transaction_id }}</small>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted">Tổng tiền</label>
+                        <label class="form-label text-muted">Tổng tiền đơn hàng</label>
                         <div class="fw-bold text-success fs-5">{{ number_format($order->total_amount, 0, ',', '.') }}đ</div>
+                        <div class="d-flex flex-column mt-1">
+                            <small class="text-muted">
+                                Tạm tính: {{ number_format($order->subtotal, 0, ',', '.') }}đ
+                            </small>
+                            @if($order->discount_amount > 0)
+                            <small class="text-muted">
+                                Giảm giá: -{{ number_format($order->discount_amount, 0, ',', '.') }}đ
+                            </small>
+                            @endif
+                            <small class="text-muted">
+                                Phí vận chuyển: {{ number_format($order->shipping_fee, 0, ',', '.') }}đ
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,6 +167,30 @@
                             @endforeach
                         </tbody>
                         <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end">Tạm tính:</td>
+                                <td class="text-end">
+                                    <span class="fw-semibold">{{ number_format($order->subtotal, 0, ',', '.') }}đ</span>
+                                </td>
+                            </tr>
+                            @if($order->discount_amount > 0)
+                            <tr>
+                                <td colspan="3" class="text-end">Giảm giá 
+                                    @if($order->voucher_code)
+                                        <span class="badge bg-primary">{{ $order->voucher_code }}</span>
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    <span class="fw-semibold text-danger">-{{ number_format($order->discount_amount, 0, ',', '.') }}đ</span>
+                                </td>
+                            </tr>
+                            @endif
+                            <tr>
+                                <td colspan="3" class="text-end">Phí vận chuyển:</td>
+                                <td class="text-end">
+                                    <span class="fw-semibold">{{ number_format($order->shipping_fee, 0, ',', '.') }}đ</span>
+                                </td>
+                            </tr>
                             <tr class="table-light">
                                 <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
                                 <td class="text-end">
@@ -191,12 +247,22 @@
                     </div>
                 </div>
                 
-                <div class="mb-0">
+                <div class="mb-3">
                     <label class="form-label text-muted">Địa chỉ giao hàng</label>
                     <div class="fw-semibold">
                         <i class="bi bi-geo-alt me-1"></i>{{ $order->customer_address }}
                     </div>
                 </div>
+                
+                @if($order->note)
+                <div class="mb-0">
+                    <label class="form-label text-muted">Ghi chú đơn hàng</label>
+                    <div class="p-2 bg-light rounded border">
+                        <i class="bi bi-chat-left-text me-1 text-muted"></i>
+                        {{ $order->note }}
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
 

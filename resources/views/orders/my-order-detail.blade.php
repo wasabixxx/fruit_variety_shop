@@ -172,6 +172,20 @@
                                 @endforeach
                             </tbody>
                             <tfoot class="table-light">
+                                @if($order->discount_amount > 0)
+                                <tr>
+                                    <td colspan="3" class="text-end">Tạm tính:</td>
+                                    <td>{{ number_format($order->total_amount + $order->discount_amount - $order->shipping_fee) }} VNĐ</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end">Giảm giá:</td>
+                                    <td class="text-danger">-{{ number_format($order->discount_amount) }} VNĐ</td>
+                                </tr>
+                                @endif
+                                <tr>
+                                    <td colspan="3" class="text-end">Phí vận chuyển:</td>
+                                    <td>{{ number_format($order->shipping_fee) }} VNĐ</td>
+                                </tr>
                                 <tr>
                                     <th colspan="3" class="text-end">Tổng cộng:</th>
                                     <th class="text-success">{{ number_format($order->total_amount) }} VNĐ</th>

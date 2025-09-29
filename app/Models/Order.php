@@ -15,6 +15,7 @@ class Order extends Model
         'customer_phone',
         'customer_address',
         'total_amount',
+        'shipping_fee',
         'voucher_id',
         'voucher_code',
         'discount_amount',
@@ -29,6 +30,7 @@ class Order extends Model
     protected $casts = [
         'total_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'shipping_fee' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
@@ -124,6 +126,11 @@ class Order extends Model
         return number_format($this->subtotal, 0, ',', '.') . 'đ';
     }
 
+    public function getFormattedShippingFee(): string
+    {
+        return number_format($this->shipping_fee, 0, ',', '.') . 'đ';
+    }
+    
     public function getFormattedTotal(): string
     {
         return number_format($this->total_amount, 0, ',', '.') . 'đ';

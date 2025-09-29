@@ -40,7 +40,10 @@
                     @endif
                     
                     <div class="text-end">
-                        <h4>Tổng cộng: <span class="text-success">{{ number_format($total, 0, ',', '.') }}đ</span></h4>
+                        <h5>Tạm tính: <span class="text-muted">{{ number_format($total, 0, ',', '.') }}đ</span></h5>
+                        <h4>Tổng cộng: <span class="text-success" id="total_with_shipping">{{ number_format($total, 0, ',', '.') }}đ</span></h4>
+                        <!-- Hidden field to store original total for JS -->
+                        <input type="hidden" id="order_total" data-total="{{ $total }}">
                     </div>
                 </div>
             </div>
@@ -62,8 +65,40 @@
                             <input type="tel" class="form-control" id="customer_phone" name="customer_phone" required>
                         </div>
                         <div class="mb-3">
-                            <label for="customer_address" class="form-label">Địa chỉ giao hàng *</label>
-                            <textarea class="form-control" id="customer_address" name="customer_address" rows="3" required></textarea>
+                            <label class="form-label">Địa chỉ giao hàng *</label>
+                            <div class="row g-2 mb-2">
+                                <div class="col-12">
+                                    <select class="form-select" id="province" name="province" required>
+                                        <option value="">Chọn Tỉnh/Thành phố</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" id="district" name="district" required disabled>
+                                        <option value="">Chọn Quận/Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" id="ward" name="ward" required disabled>
+                                        <option value="">Chọn Phường/Xã</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" class="form-control" id="address_detail" name="address_detail" 
+                                           placeholder="Số nhà, tên đường" required>
+                                </div>
+                            </div>
+                            <input type="hidden" id="full_address" name="customer_address" value="">
+                            <input type="hidden" id="shipping_fee" name="shipping_fee" value="0">
+                        </div>
+                        
+                        <!-- Shipping Fee Information -->
+                        <div class="alert alert-info">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-truck"></i> Phí vận chuyển:
+                                </div>
+                                <span id="shipping_fee_amount">0₫</span>
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Phương thức thanh toán *</label>
@@ -107,3 +142,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/address.js') }}"></script>
+@endpush

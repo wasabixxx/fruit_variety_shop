@@ -43,7 +43,12 @@ class OrderController extends Controller
         // Get voucher info
         $appliedVoucher = session('applied_voucher');
         $discountAmount = session('voucher_discount_amount', 0);
-        $total = $subtotal - $discountAmount;
+        
+        // Get shipping fee from request
+        $shippingFee = (float) $request->input('shipping_fee', 0);
+        
+        // Calculate total with shipping fee
+        $total = $subtotal - $discountAmount + $shippingFee;
         
         if ($subtotal <= 0 || count($cart) === 0) {
             return redirect()->route('cart.index')->with('warning', 'Giỏ hàng trống!');
@@ -53,7 +58,12 @@ class OrderController extends Controller
             'payment_method' => 'required|in:cod,momo_atm,momo_card,momo_wallet',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
-            'customer_address' => 'required|string|max:500'
+            'customer_address' => 'required|string|max:500',
+            'province' => 'required',
+            'district' => 'required',
+            'ward' => 'required',
+            'address_detail' => 'required|string|max:255',
+            'shipping_fee' => 'required|numeric|min:0'
         ]);
 
         $paymentMethod = $request->input('payment_method');
@@ -64,11 +74,16 @@ class OrderController extends Controller
                 'items' => $cart,
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
+                'shipping_fee' => $shippingFee,
                 'total' => $total,
                 'payment_method' => $paymentMethod,
                 'customer_name' => $request->input('customer_name'),
                 'customer_phone' => $request->input('customer_phone'),
                 'customer_address' => $request->input('customer_address'),
+                'province' => $request->input('province'),
+                'district' => $request->input('district'),
+                'ward' => $request->input('ward'),
+                'address_detail' => $request->input('address_detail'),
                 'order_time' => now()->format('d/m/Y H:i:s'),
                 'voucher' => $appliedVoucher
             ]
@@ -83,6 +98,7 @@ class OrderController extends Controller
                 'customer_address' => $request->customer_address,
                 'total_amount' => $total,
                 'discount_amount' => $discountAmount,
+                'shipping_fee' => $shippingFee,
                 'voucher_id' => $appliedVoucher ? $appliedVoucher['id'] : null,
                 'voucher_code' => $appliedVoucher ? $appliedVoucher['code'] : null,
                 'payment_method' => 'cod',
@@ -271,6 +287,8 @@ class OrderController extends Controller
                 'customer_phone' => $orderInfo['customer_phone'],
                 'customer_address' => $orderInfo['customer_address'],
                 'total_amount' => $orderInfo['total'],
+                'discount_amount' => $orderInfo['discount_amount'] ?? 0,
+                'shipping_fee' => $orderInfo['shipping_fee'] ?? 0,
                 'payment_method' => $orderInfo['payment_method'],
                 'payment_status' => 'paid',
                 'order_status' => 'confirmed',
